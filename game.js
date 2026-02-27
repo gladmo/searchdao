@@ -419,7 +419,7 @@ function addLog(message, type = 'info') {
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
     
-    const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\s/g, '');
+    const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     entry.textContent = `[${timestamp}] ${message}`;
     
     logContent.insertBefore(entry, logContent.firstChild);
