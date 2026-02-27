@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寻道大千 - 修仙放置游戏</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>寻道大千</h1>
+            <div class="player-info">
+                <div class="info-item">
+                    <span class="label">等级:</span>
+                    <span id="player-level">1</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">经验:</span>
+                    <span id="player-exp">0</span>/<span id="player-max-exp">100</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">灵石:</span>
+                    <span id="spirit-stones">0</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="game-area">
+                <!-- Resource Gathering Section -->
+                <section class="panel gathering-panel">
+                    <h2>采集资源</h2>
+                    <div class="gathering-actions">
+                        <button id="chop-tree-btn" class="action-btn">
+                            <span class="btn-text">砍树</span>
+                            <span class="btn-cooldown" id="chop-cooldown"></span>
+                        </button>
+                        <div class="resource-display">
+                            <div class="resource-item">
+                                <span class="resource-name">木材:</span>
+                                <span id="wood-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Equipment Section -->
+                <section class="panel equipment-panel">
+                    <h2>装备系统</h2>
+                    <div class="equipment-slots">
+                        <div class="equipment-slot">
+                            <div class="slot-name">武器</div>
+                            <div id="weapon-slot" class="slot-content empty">无</div>
+                            <button id="upgrade-weapon-btn" class="upgrade-btn">强化武器</button>
+                        </div>
+                        <div class="equipment-slot">
+                            <div class="slot-name">护甲</div>
+                            <div id="armor-slot" class="slot-content empty">无</div>
+                            <button id="upgrade-armor-btn" class="upgrade-btn">强化护甲</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pet Section -->
+                <section class="panel pet-panel">
+                    <h2>灵宠系统</h2>
+                    <div id="pet-display" class="pet-display">
+                        <div class="pet-info">
+                            <div class="pet-name" id="pet-name">无灵宠</div>
+                            <div class="pet-level">等级: <span id="pet-level">0</span></div>
+                        </div>
+                        <button id="summon-pet-btn" class="action-btn">召唤灵宠 (50 灵石)</button>
+                        <button id="upgrade-pet-btn" class="action-btn" style="display:none;">提升灵宠</button>
+                    </div>
+                </section>
+
+                <!-- Skills Section -->
+                <section class="panel skills-panel">
+                    <h2>技能系统</h2>
+                    <div id="skills-list" class="skills-list">
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">基础剑法</span>
+                                <span class="skill-level">Lv.<span id="skill-basic-level">1</span></span>
+                            </div>
+                            <button class="upgrade-skill-btn" data-skill="basic">升级 (10 灵石)</button>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span class="skill-name">御剑术</span>
+                                <span class="skill-level">Lv.<span id="skill-flying-level">1</span></span>
+                            </div>
+                            <button class="upgrade-skill-btn" data-skill="flying">升级 (20 灵石)</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PVP Section -->
+                <section class="panel pvp-panel">
+                    <h2>竞技场</h2>
+                    <div class="pvp-content">
+                        <div class="player-power">
+                            战力: <span id="player-power">0</span>
+                        </div>
+                        <button id="pvp-battle-btn" class="action-btn">挑战对手</button>
+                        <div id="pvp-result" class="pvp-result"></div>
+                        <div class="pvp-stats">
+                            <div>胜场: <span id="pvp-wins">0</span></div>
+                            <div>败场: <span id="pvp-losses">0</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Events Section -->
+                <section class="panel events-panel">
+                    <h2>限时活动</h2>
+                    <div id="events-list" class="events-list">
+                        <div class="event-item active">
+                            <div class="event-name">双倍经验活动</div>
+                            <div class="event-timer">剩余时间: <span id="event-timer-1">--:--</span></div>
+                            <div class="event-status">状态: 进行中</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Inventory Sidebar -->
+            <aside class="inventory-sidebar">
+                <h2>背包</h2>
+                <div id="inventory-list" class="inventory-list">
+                    <div class="inventory-empty">背包为空</div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Game Log -->
+        <div class="game-log">
+            <h3>游戏日志</h3>
+            <div id="log-content" class="log-content"></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
