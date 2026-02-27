@@ -44,6 +44,9 @@ const QUALITY_MULTIPLIERS = [1, 1.5, 2, 3, 5];
 // Pet names
 const PET_NAMES = ['灵狐', '青龙', '朱雀', '玄武', '白虎', '麒麟'];
 
+// Game constants
+const EVENT_RESTART_DELAY = 120000; // 2 minutes
+
 // Initialize game
 function initGame() {
     loadGameState();
@@ -304,7 +307,7 @@ function updateEventTimer() {
             gameState.events.doubleExp.active = false;
             addLog('双倍经验活动已结束', 'warning');
             // Restart event after 2 minutes
-            setTimeout(startEvent, 120000);
+            setTimeout(startEvent, EVENT_RESTART_DELAY);
         }
         
         const minutes = Math.floor(remaining / 60000);
@@ -416,7 +419,7 @@ function addLog(message, type = 'info') {
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
     
-    const timestamp = new Date().toLocaleTimeString('zh-CN');
+    const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\s/g, '');
     entry.textContent = `[${timestamp}] ${message}`;
     
     logContent.insertBefore(entry, logContent.firstChild);
