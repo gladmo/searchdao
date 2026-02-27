@@ -131,9 +131,9 @@ function gainExp(amount) {
 
 // Equipment system
 function upgradeEquipment(slot) {
-    const cost = gameState.resources.wood >= 50 ? 50 : -1;
+    const cost = 50;
     
-    if (cost < 0 || gameState.resources.wood < cost) {
+    if (gameState.resources.wood < cost) {
         addLog('木材不足！需要 50 木材', 'error');
         return;
     }
@@ -438,18 +438,18 @@ function startGameLoop() {
     setInterval(() => {
         saveGameState();
     }, 30000);
-}
-
-// Passive resource generation (idle mechanics)
-setInterval(() => {
-    if (gameState.pet && gameState.pet.level >= 5) {
-        const woodGain = Math.floor(gameState.pet.level * 0.5);
-        if (woodGain > 0) {
-            gameState.resources.wood += woodGain;
-            updateUI();
+    
+    // Passive resource generation (idle mechanics)
+    setInterval(() => {
+        if (gameState.pet && gameState.pet.level >= 5) {
+            const woodGain = Math.floor(gameState.pet.level * 0.5);
+            if (woodGain > 0) {
+                gameState.resources.wood += woodGain;
+                updateUI();
+            }
         }
-    }
-}, 10000); // Every 10 seconds
+    }, 10000); // Every 10 seconds
+}
 
 // Initialize on load
 window.addEventListener('DOMContentLoaded', initGame);
