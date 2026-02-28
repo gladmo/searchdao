@@ -48,6 +48,9 @@ const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗', '传说', '�
 // Quality level for Epic and above (affixes start from Epic quality)
 const EPIC_QUALITY_THRESHOLD = 4;
 
+// Minimum drop rate for any quality tier (prevents zero probability)
+const MIN_QUALITY_DROP_RATE = 0.05;
+
 // Combat power calculation constants
 const LIFE_TO_POWER_RATIO = 10;
 const DEFENSE_MULTIPLIER = 2;
@@ -428,6 +431,12 @@ function updateCultivationStage() {
 // Generate affixes for equipment based on level and quality
 // Only Epic quality (4) and above can have affixes
 function generateAffixes(equipmentLevel, quality) {
+    // Validate quality is within valid bounds
+    if (quality < 1 || quality >= QUALITY_NAMES.length) {
+        console.warn(`Invalid quality value: ${quality}. Defaulting to no affixes.`);
+        return [];
+    }
+    
     // Only Epic quality and above can have affixes
     if (quality < EPIC_QUALITY_THRESHOLD) return [];
     
@@ -519,8 +528,8 @@ function dropEquipment() {
     
     // Apply power bonus to each quality's base rate
     const adjustedRates = {
-        normal: Math.max(0.05, rates.normal + qualityBonus * multipliers.normal),
-        fine: Math.max(0.05, rates.fine + qualityBonus * multipliers.fine),
+        normal: Math.max(MIN_QUALITY_DROP_RATE, rates.normal + qualityBonus * multipliers.normal),
+        fine: Math.max(MIN_QUALITY_DROP_RATE, rates.fine + qualityBonus * multipliers.fine),
         rare: rates.rare + qualityBonus * multipliers.rare,
         epic: rates.epic + qualityBonus * multipliers.epic,
         legendary: rates.legendary + qualityBonus * multipliers.legendary,
@@ -530,26 +539,33 @@ function dropEquipment() {
     
     // Normalize to ensure sum is 1.0
     const totalRate = Object.values(adjustedRates).reduce((sum, rate) => sum + rate, 0);
-    Object.keys(adjustedRates).forEach(key => {
-        adjustedRates[key] /= totalRate;
-    });
     
-    // Calculate cumulative thresholds
-    const normalThreshold = adjustedRates.normal;
-    const fineThreshold = normalThreshold + adjustedRates.fine;
-    const rareThreshold = fineThreshold + adjustedRates.rare;
-    const epicThreshold = rareThreshold + adjustedRates.epic;
-    const legendaryThreshold = epicThreshold + adjustedRates.legendary;
-    const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
-    
-    let quality;
-    if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
-    else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
-    else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
-    else if (qualityRoll < epicThreshold) quality = 4;        // 史诗 Epic
-    else if (qualityRoll < legendaryThreshold) quality = 5;   // 传说 Legendary
-    else if (qualityRoll < mythicalThreshold) quality = 6;    // 神话 Mythical
-    else quality = 7;                                          // 不朽 Immortal
+    // Safety check to prevent division by zero
+    if (totalRate <= 0) {
+        console.error('Total drop rate is zero or negative. Using default quality (Normal).');
+        quality = 1; // Default to Normal quality
+    } else {
+        // Normalize rates
+        Object.keys(adjustedRates).forEach(key => {
+            adjustedRates[key] /= totalRate;
+        });
+        
+        // Calculate cumulative thresholds
+        const normalThreshold = adjustedRates.normal;
+        const fineThreshold = normalThreshold + adjustedRates.fine;
+        const rareThreshold = fineThreshold + adjustedRates.rare;
+        const epicThreshold = rareThreshold + adjustedRates.epic;
+        const legendaryThreshold = epicThreshold + adjustedRates.legendary;
+        const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
+        
+        if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
+        else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
+        else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
+        else if (qualityRoll < epicThreshold) quality = 4;        // 史诗 Epic
+        else if (qualityRoll < legendaryThreshold) quality = 5;   // 传说 Legendary
+        else if (qualityRoll < mythicalThreshold) quality = 6;    // 神话 Mythical
+        else quality = 7;                                          // 不朽 Immortal
+    }
     
     // Random level (1 to player level + 2), capped at max level
     const maxEquipmentLevel = Math.min(gameState.level + 2, LEVEL_CONFIG.maxLevel);
