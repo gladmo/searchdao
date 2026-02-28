@@ -89,6 +89,9 @@ function loadGameState() {
     }
 }
 
+// ID counter for unique equipment IDs
+let equipmentIdCounter = 0;
+
 // Stamina recovery system
 function startStaminaRecovery() {
     setInterval(() => {
@@ -157,7 +160,7 @@ function dropEquipment() {
     // Calculate stats based on quality and level
     const baseStats = level * 10 * quality;
     const equipment = {
-        id: Date.now() + Math.random(),
+        id: ++equipmentIdCounter,
         name: equipType.name,
         icon: equipType.icon,
         type: equipType.type,
@@ -184,10 +187,26 @@ function dropEquipment() {
     updateCombatPower();
 }
 
-// Auto equip logic
+// Auto equip logic - automatically disassemble lower quality items of same type
 function autoEquipCheck(newEquipment) {
-    // For simplicity, we'll keep all equipment and let player manage
-    // In a more complex system, we could compare and auto-disassemble weaker items
+    // Find equipment of same type with lower quality or level
+    for (let i = gameState.equipment.length - 2; i >= 0; i--) {
+        const existing = gameState.equipment[i];
+        if (existing.type === newEquipment.type) {
+            // If new equipment is better quality, or same quality but higher level
+            if (newEquipment.quality > existing.quality || 
+                (newEquipment.quality === existing.quality && newEquipment.level > existing.level)) {
+                // Auto-disassemble the weaker item
+                const reward = existing.level * existing.quality * 10;
+                gameState.spiritStone += reward;
+                gameState.disassembleCount++;
+                gameState.disassembleReward += reward;
+                gameState.equipment.splice(i, 1);
+                showNotification(`自动分解 ${existing.name}，获得 ${reward} 灵石`);
+                break;
+            }
+        }
+    }
 }
 
 // Disassemble equipment
@@ -229,12 +248,16 @@ function toggleAutoEquip() {
     saveGameState();
 }
 
+// Combat power calculation constants
+const LIFE_TO_POWER_RATIO = 10;
+const DEFENSE_MULTIPLIER = 2;
+
 // Calculate combat power from all equipment
 function updateCombatPower() {
     let totalPower = 0;
     
     gameState.equipment.forEach(equip => {
-        totalPower += equip.attack + equip.life / 10 + equip.defense * 2 + equip.agility;
+        totalPower += equip.attack + equip.life / LIFE_TO_POWER_RATIO + equip.defense * DEFENSE_MULTIPLIER + equip.agility;
     });
     
     gameState.combatPower = Math.floor(totalPower);
