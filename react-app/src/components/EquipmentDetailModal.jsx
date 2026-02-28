@@ -28,26 +28,27 @@ const EquipmentDetailModal = ({ equipment, onClose }) => {
             </div>
           </div>
           
-          <div className="equipment-stats">
-            <div className="stat-item">
-              <span className="stat-icon">⚔️</span>
-              <span className="stat-label">攻击</span>
-              <span className="stat-value">{equipment.attack}</span>
+          <div className="base-attributes-section">
+            <div className="attributes-title">基础属性</div>
+            <div className="attribute-entry">
+              <span className="attribute-icon">⚔️</span>
+              <span className="attribute-name">攻击</span>
+              <span className="attribute-value">+{equipment.attack}</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-icon">❤️</span>
-              <span className="stat-label">生命</span>
-              <span className="stat-value">{equipment.life}</span>
+            <div className="attribute-entry">
+              <span className="attribute-icon">❤️</span>
+              <span className="attribute-name">生命</span>
+              <span className="attribute-value">+{equipment.life}</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-icon">🛡️</span>
-              <span className="stat-label">防御</span>
-              <span className="stat-value">{equipment.defense}</span>
+            <div className="attribute-entry">
+              <span className="attribute-icon">🛡️</span>
+              <span className="attribute-name">防御</span>
+              <span className="attribute-value">+{equipment.defense}</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-icon">⚡</span>
-              <span className="stat-label">敏捷</span>
-              <span className="stat-value">{equipment.agility}</span>
+            <div className="attribute-entry">
+              <span className="attribute-icon">⚡</span>
+              <span className="attribute-name">敏捷</span>
+              <span className="attribute-value">+{equipment.agility}</span>
             </div>
           </div>
           
@@ -55,8 +56,9 @@ const EquipmentDetailModal = ({ equipment, onClose }) => {
             <div className="affixes-section">
               <div className="affixes-title">装备词条</div>
               {equipment.affixes.map((affix, idx) => (
-                <div key={idx} className="affix-item">
-                  {affix.name}+{affix.value}
+                <div key={idx} className="affix-entry">
+                  <span className="affix-name">{affix.name}</span>
+                  <span className="affix-value">+{affix.value}</span>
                 </div>
               ))}
             </div>

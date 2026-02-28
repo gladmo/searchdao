@@ -89,6 +89,21 @@
 .stat-row:last-child {
   border-bottom: none;
   font-weight: bold;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 12px 8px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.stat-row:last-child .stat-label {
+  font-size: 16px;
+  color: #667eea;
+}
+
+.stat-row:last-child .stat-old,
+.stat-row:last-child .stat-new {
+  font-size: 18px;
+  color: #333;
 }
 
 .stat-label {
