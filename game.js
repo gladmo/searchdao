@@ -286,14 +286,18 @@ function dropEquipment() {
     const qualityBonus = powerTier.qualityBonus;
     
     let quality;
-    // Adjust drop rates based on combat power
-    if (qualityRoll < 0.5 - qualityBonus) quality = 1;      // Common (reduced with power)
-    else if (qualityRoll < 0.8 - qualityBonus * 0.5) quality = 2; // Uncommon
-    else if (qualityRoll < 0.95) quality = 3;                // Rare (increased with power)
-    else quality = 4;                                         // Epic (slightly increased with power)
+    // Adjust drop rates based on combat power, prevent negative thresholds
+    const commonThreshold = Math.max(0, 0.5 - qualityBonus);
+    const uncommonThreshold = Math.max(commonThreshold, 0.8 - qualityBonus * 0.5);
     
-    // Random level (1 to player level + 2)
-    const level = Math.floor(Math.random() * (gameState.level + 2)) + 1;
+    if (qualityRoll < commonThreshold) quality = 1;      // Common (reduced with power)
+    else if (qualityRoll < uncommonThreshold) quality = 2; // Uncommon
+    else if (qualityRoll < 0.95) quality = 3;              // Rare (increased with power)
+    else quality = 4;                                       // Epic (slightly increased with power)
+    
+    // Random level (1 to player level + 2), capped at max level
+    const maxEquipmentLevel = Math.min(gameState.level + 2, LEVEL_CONFIG.maxLevel);
+    const level = Math.floor(Math.random() * maxEquipmentLevel) + 1;
     
     // Get level-based multipliers
     const baseMultiplier = LEVEL_ATTRIBUTE_CONFIG.getBaseMultiplier(gameState.level);
