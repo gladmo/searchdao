@@ -27,6 +27,7 @@ const gameState = {
     // Equipment
     equipment: [],
     maxEquipment: 12,
+    equipmentIdCounter: 0,
     
     // Settings
     autoEquip: false,
@@ -35,6 +36,9 @@ const gameState = {
     disassembleCount: 0,
     disassembleReward: 0
 };
+
+// Quality tier names
+const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗'];
 
 // Equipment types and their icons
 const equipmentTypes = [
@@ -86,11 +90,12 @@ function loadGameState() {
         const loadedState = JSON.parse(saved);
         Object.assign(gameState, loadedState);
         gameState.lastStaminaUpdate = Date.now();
+        // Initialize equipmentIdCounter from loaded state
+        if (!gameState.equipmentIdCounter) {
+            gameState.equipmentIdCounter = 0;
+        }
     }
 }
-
-// ID counter for unique equipment IDs
-let equipmentIdCounter = 0;
 
 // Stamina recovery system
 function startStaminaRecovery() {
@@ -160,7 +165,7 @@ function dropEquipment() {
     // Calculate stats based on quality and level
     const baseStats = level * 10 * quality;
     const equipment = {
-        id: ++equipmentIdCounter,
+        id: ++gameState.equipmentIdCounter,
         name: equipType.name,
         icon: equipType.icon,
         type: equipType.type,
@@ -175,8 +180,7 @@ function dropEquipment() {
     gameState.equipment.push(equipment);
     
     // Show notification
-    const qualityNames = ['', '普通', '精良', '稀有', '史诗'];
-    showNotification(`获得 ${qualityNames[quality]} ${equipment.name} ${level}级`);
+    showNotification(`获得 ${QUALITY_NAMES[quality]} ${equipment.name} ${level}级`);
     
     // Auto equip if enabled and this is better than existing
     if (gameState.autoEquip) {
@@ -197,7 +201,7 @@ function autoEquipCheck(newEquipment) {
             if (newEquipment.quality > existing.quality || 
                 (newEquipment.quality === existing.quality && newEquipment.level > existing.level)) {
                 // Auto-disassemble the weaker item
-                const reward = existing.level * existing.quality * 10;
+                const reward = calculateDisassembleReward(existing);
                 gameState.spiritStone += reward;
                 gameState.disassembleCount++;
                 gameState.disassembleReward += reward;
@@ -214,7 +218,7 @@ function disassembleEquipment(index) {
     if (index < 0 || index >= gameState.equipment.length) return;
     
     const equipment = gameState.equipment[index];
-    const reward = equipment.level * equipment.quality * 10;
+    const reward = calculateDisassembleReward(equipment);
     
     gameState.spiritStone += reward;
     gameState.disassembleCount++;
@@ -251,6 +255,13 @@ function toggleAutoEquip() {
 // Combat power calculation constants
 const LIFE_TO_POWER_RATIO = 10;
 const DEFENSE_MULTIPLIER = 2;
+
+// Disassemble reward calculation
+const DISASSEMBLE_REWARD_BASE = 10;
+
+function calculateDisassembleReward(equipment) {
+    return equipment.level * equipment.quality * DISASSEMBLE_REWARD_BASE;
+}
 
 // Calculate combat power from all equipment
 function updateCombatPower() {
