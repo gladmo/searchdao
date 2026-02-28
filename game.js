@@ -40,6 +40,13 @@ const gameState = {
 // Quality tier names
 const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗'];
 
+// Combat power calculation constants
+const LIFE_TO_POWER_RATIO = 10;
+const DEFENSE_MULTIPLIER = 2;
+
+// Disassemble reward calculation
+const DISASSEMBLE_REWARD_BASE = 10;
+
 // Equipment types and their icons
 const equipmentTypes = [
     { name: '武器', icon: '⚔️', type: 'weapon' },
@@ -329,11 +336,6 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
     setTimeout(() => modal.classList.add('show'), 10);
 }
 
-// Calculate equipment power
-function calculateEquipmentPower(equipment) {
-    return equipment.attack + equipment.life / LIFE_TO_POWER_RATIO + equipment.defense * DEFENSE_MULTIPLIER + equipment.agility;
-}
-
 // Equip new equipment and disassemble old one
 function equipNewEquipment(oldEquipment, newEquipment) {
     const reward = calculateDisassembleReward(oldEquipment);
@@ -443,13 +445,6 @@ function toggleAutoEquip() {
     
     saveGameState();
 }
-
-// Combat power calculation constants
-const LIFE_TO_POWER_RATIO = 10;
-const DEFENSE_MULTIPLIER = 2;
-
-// Disassemble reward calculation
-const DISASSEMBLE_REWARD_BASE = 10;
 
 function calculateDisassembleReward(equipment) {
     return equipment.level * equipment.quality * DISASSEMBLE_REWARD_BASE;
