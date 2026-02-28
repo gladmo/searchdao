@@ -29,6 +29,7 @@
     transparent 100%
   );
   opacity: 0.8;
+  /* Fixed blur for consistent focused beam effect across all quality levels */
   filter: blur(8px);
   animation: beamPulse 2s ease-in-out;
   box-shadow: 0 0 20px var(--beam-color), 0 0 40px var(--beam-color);
