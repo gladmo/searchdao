@@ -1,0 +1,96 @@
+.records-modal {
+  max-width: 600px;
+}
+
+.records-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.empty-records {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.record-item {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.record-type {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+}
+
+.type-equipment_drop {
+  background: #4caf50;
+}
+
+.type-equipment_equip {
+  background: #2196f3;
+}
+
+.type-equipment_disassemble {
+  background: #ff9800;
+}
+
+.record-time {
+  font-size: 11px;
+  color: #666;
+}
+
+.record-equipment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.record-equipment .equipment-icon {
+  font-size: 24px;
+}
+
+.record-equipment .equipment-name {
+  font-weight: bold;
+}
+
+.record-equipment .equipment-quality {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.record-equipment .equipment-level {
+  font-size: 11px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.record-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+.record-reward {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #ff9800;
+  font-weight: bold;
+}

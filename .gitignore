@@ -1,0 +1,12 @@
+# Old vanilla JS files (keeping for reference but not deploying)
+game.js
+styles.css
+
+# Node modules
+react-app/node_modules/
+
+# Build outputs (generated from react-app/dist)
+# Don't ignore these as they're needed for GitHub Pages
+# assets/
+# index.html
+# vite.svg

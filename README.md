@@ -95,18 +95,84 @@ http://localhost:8000
 
 ## 🛠️ 技术栈
 
-- **前端框架**：纯 HTML/CSS/JavaScript
-- **构建工具**：无需构建工具，开箱即用
+- **前端框架**：React 18 + Vite
+- **状态管理**：React Context API
+- **构建工具**：Vite 7.x
 - **数据存储**：LocalStorage 本地存储游戏进度
 - **部署方式**：GitHub Actions 自动部署到 GitHub Pages
+
+## 📁 项目结构
+
+```
+searchdao/
+├── react-app/              # React应用源码
+│   ├── src/
+│   │   ├── components/     # React组件
+│   │   │   ├── TopBar.jsx            # 顶部栏（玩家信息、战力）
+│   │   │   ├── Notification.jsx      # 通知组件
+│   │   │   ├── GameArea.jsx          # 游戏区域（砍树）
+│   │   │   ├── LevelDisplay.jsx      # 等级显示
+│   │   │   ├── StaminaBar.jsx        # 修为条
+│   │   │   ├── StatsDisplay.jsx      # 属性显示
+│   │   │   ├── EquipmentGrid.jsx     # 装备网格
+│   │   │   ├── BottomActions.jsx     # 底部操作
+│   │   │   ├── BottomNav.jsx         # 底部导航
+│   │   │   ├── EquipmentComparisonModal.jsx  # 装备对比弹窗
+│   │   │   ├── EquipmentDetailModal.jsx      # 装备详情弹窗
+│   │   │   └── RecordsModal.jsx      # 记录查询弹窗
+│   │   ├── contexts/       # React Context
+│   │   │   └── GameContext.jsx       # 游戏状态管理
+│   │   ├── utils/          # 工具模块
+│   │   │   ├── constants.js          # 游戏常量
+│   │   │   ├── equipment.js          # 装备生成与管理
+│   │   │   ├── calculations.js       # 战力计算
+│   │   │   └── storage.js            # 本地存储
+│   │   ├── App.jsx         # 主应用组件
+│   │   └── main.jsx        # 应用入口
+│   ├── index.html          # HTML模板
+│   ├── vite.config.js      # Vite配置
+│   └── package.json        # 依赖管理
+├── assets/                 # 构建产物（自动生成）
+├── index.html              # 生产环境HTML（自动生成）
+└── .github/workflows/      # GitHub Actions配置
+    └── deploy.yml          # 自动部署配置
+```
 
 ## 📦 部署说明
 
 项目配置了 GitHub Actions 自动部署流程：
 
-- 当代码推送到 `main` 分支时自动触发部署
+- 当代码推送到 `master` 分支时自动触发部署
+- 自动构建 React 应用并部署到 GitHub Pages
 - 部署配置文件：`.github/workflows/deploy.yml`
 - 部署目标：GitHub Pages
+
+## 🔧 开发说明
+
+### 本地开发
+
+```bash
+# 进入React应用目录
+cd react-app
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+```
+
+### 代码结构
+
+项目采用模块化设计：
+
+- **组件化**：UI拆分为12个独立的React组件，每个组件负责特定功能
+- **状态管理**：使用Context API统一管理游戏状态，避免prop drilling
+- **工具模块**：将游戏逻辑拆分为独立的工具模块（装备、计算、存储等）
+- **样式隔离**：每个组件都有独立的CSS文件，便于维护
 
 ## 🤝 贡献
 
