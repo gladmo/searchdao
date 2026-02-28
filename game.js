@@ -527,45 +527,41 @@ function dropEquipment() {
     const multipliers = QUALITY_DROP_CONFIG.powerMultipliers;
     
     // Apply power bonus to each quality's base rate
+    // Note: Only normal and fine qualities need MIN_QUALITY_DROP_RATE protection
+    // because they have negative multipliers that could make them too small
     const adjustedRates = {
         normal: Math.max(MIN_QUALITY_DROP_RATE, rates.normal + qualityBonus * multipliers.normal),
         fine: Math.max(MIN_QUALITY_DROP_RATE, rates.fine + qualityBonus * multipliers.fine),
-        rare: rates.rare + qualityBonus * multipliers.rare,
-        epic: rates.epic + qualityBonus * multipliers.epic,
-        legendary: rates.legendary + qualityBonus * multipliers.legendary,
-        mythical: rates.mythical + qualityBonus * multipliers.mythical,
-        immortal: rates.immortal + qualityBonus * multipliers.immortal
+        rare: Math.max(0, rates.rare + qualityBonus * multipliers.rare),
+        epic: Math.max(0, rates.epic + qualityBonus * multipliers.epic),
+        legendary: Math.max(0, rates.legendary + qualityBonus * multipliers.legendary),
+        mythical: Math.max(0, rates.mythical + qualityBonus * multipliers.mythical),
+        immortal: Math.max(0, rates.immortal + qualityBonus * multipliers.immortal)
     };
     
-    // Normalize to ensure sum is 1.0
+    // Normalize to ensure sum is 1.0 (totalRate is always > 0 due to MIN_QUALITY_DROP_RATE)
     const totalRate = Object.values(adjustedRates).reduce((sum, rate) => sum + rate, 0);
+    Object.keys(adjustedRates).forEach(key => {
+        adjustedRates[key] /= totalRate;
+    });
     
-    // Safety check to prevent division by zero
-    if (totalRate <= 0) {
-        console.error('Total drop rate is zero or negative. Using default quality (Normal).');
-        quality = 1; // Default to Normal quality
-    } else {
-        // Normalize rates
-        Object.keys(adjustedRates).forEach(key => {
-            adjustedRates[key] /= totalRate;
-        });
-        
-        // Calculate cumulative thresholds
-        const normalThreshold = adjustedRates.normal;
-        const fineThreshold = normalThreshold + adjustedRates.fine;
-        const rareThreshold = fineThreshold + adjustedRates.rare;
-        const epicThreshold = rareThreshold + adjustedRates.epic;
-        const legendaryThreshold = epicThreshold + adjustedRates.legendary;
-        const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
-        
-        if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
-        else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
-        else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
-        else if (qualityRoll < epicThreshold) quality = 4;        // 史诗 Epic
-        else if (qualityRoll < legendaryThreshold) quality = 5;   // 传说 Legendary
-        else if (qualityRoll < mythicalThreshold) quality = 6;    // 神话 Mythical
-        else quality = 7;                                          // 不朽 Immortal
-    }
+    // Calculate cumulative thresholds
+    const normalThreshold = adjustedRates.normal;
+    const fineThreshold = normalThreshold + adjustedRates.fine;
+    const rareThreshold = fineThreshold + adjustedRates.rare;
+    const epicThreshold = rareThreshold + adjustedRates.epic;
+    const legendaryThreshold = epicThreshold + adjustedRates.legendary;
+    const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
+    
+    // Determine quality based on roll
+    let quality;
+    if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
+    else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
+    else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
+    else if (qualityRoll < epicThreshold) quality = 4;        // 史诗 Epic
+    else if (qualityRoll < legendaryThreshold) quality = 5;   // 传说 Legendary
+    else if (qualityRoll < mythicalThreshold) quality = 6;    // 神话 Mythical
+    else quality = 7;                                          // 不朽 Immortal
     
     // Random level (1 to player level + 2), capped at max level
     const maxEquipmentLevel = Math.min(gameState.level + 2, LEVEL_CONFIG.maxLevel);
