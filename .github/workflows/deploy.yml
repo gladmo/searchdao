@@ -25,6 +25,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        working-directory: ./react-app
+        run: npm install
+      
+      - name: Build React app
+        working-directory: ./react-app
+        run: npm run build
+      
+      - name: Copy build to root
+        run: |
+          rm -f index.html
+          cp -r react-app/dist/* .
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
       

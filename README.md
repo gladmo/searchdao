@@ -21,18 +21,62 @@
 
 ### 本地运行
 
-**方法1：直接打开**
+**开发模式:**
 ```bash
-# 直接在浏览器中打开 index.html 文件
+cd react-app
+npm install
+npm run dev
 ```
 
-**方法2：使用本地服务器**
+**生产构建:**
 ```bash
-# 使用 Python 启动本地服务器
-python3 -m http.server 8000
+cd react-app
+npm run build
+```
 
-# 然后在浏览器访问
-http://localhost:8000
+## 🛠️ 技术栈
+
+- **前端框架**：React 18
+- **构建工具**：Vite
+- **状态管理**：React Context API
+- **数据存储**：LocalStorage 本地存储游戏进度
+- **部署方式**：GitHub Actions 自动部署到 GitHub Pages
+
+## 📁 项目结构
+
+```
+searchdao/
+├── react-app/              # React应用源码
+│   ├── src/
+│   │   ├── components/     # UI组件
+│   │   │   ├── TopBar.jsx
+│   │   │   ├── GameArea.jsx
+│   │   │   ├── LevelDisplay.jsx
+│   │   │   ├── StaminaBar.jsx
+│   │   │   ├── StatsDisplay.jsx
+│   │   │   ├── EquipmentGrid.jsx
+│   │   │   ├── BottomActions.jsx
+│   │   │   ├── BottomNav.jsx
+│   │   │   ├── Notification.jsx
+│   │   │   ├── EquipmentComparisonModal.jsx
+│   │   │   ├── EquipmentDetailModal.jsx
+│   │   │   └── RecordsModal.jsx
+│   │   ├── contexts/       # 状态管理
+│   │   │   └── GameContext.jsx
+│   │   ├── constants/      # 游戏配置
+│   │   │   └── gameConfig.js
+│   │   ├── utils/          # 工具函数
+│   │   │   ├── equipmentUtils.js
+│   │   │   ├── levelUtils.js
+│   │   │   ├── combatUtils.js
+│   │   │   └── recordUtils.js
+│   │   └── App.jsx         # 主应用组件
+│   ├── package.json
+│   └── vite.config.js
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # 自动部署配置
+└── README.md
 ```
 
 ## 🎮 游戏特性
@@ -95,8 +139,9 @@ http://localhost:8000
 
 ## 🛠️ 技术栈
 
-- **前端框架**：纯 HTML/CSS/JavaScript
-- **构建工具**：无需构建工具，开箱即用
+- **前端框架**：React 18
+- **构建工具**：Vite
+- **状态管理**：React Context API
 - **数据存储**：LocalStorage 本地存储游戏进度
 - **部署方式**：GitHub Actions 自动部署到 GitHub Pages
 

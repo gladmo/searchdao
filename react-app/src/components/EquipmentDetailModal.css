@@ -1,0 +1,89 @@
+.equipment-detail {
+    max-width: 400px;
+}
+
+.equipment-detail-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.equipment-icon-xlarge {
+    font-size: 64px;
+}
+
+.affixes-section,
+.stats-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.section-title {
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.affixes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.affix-item {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.stat-item span:first-child {
+    color: #666;
+}
+
+.stat-item span:last-child {
+    font-weight: bold;
+    color: #333;
+}
+
+.btn-danger {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+}

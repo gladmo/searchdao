@@ -1,0 +1,106 @@
+.equipment-container {
+    padding: 16px;
+    background: white;
+}
+
+.equipment-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.equipment-slot {
+    aspect-ratio: 1;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f9f9f9;
+    position: relative;
+}
+
+.equipment-slot.equipped {
+    background: white;
+}
+
+.equipment-slot.equipped:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.equipment-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+}
+
+.equipment-level {
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+}
+
+.equipment-quality {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.equipment-affixes {
+    font-size: 9px;
+    color: #ff9800;
+    text-align: center;
+    margin-top: 2px;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.equipment-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.spirit-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 24px;
+}
+
+.feature-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.feature-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.feature-btn:hover:not(.disabled) {
+    opacity: 0.9;
+}
+
+.feature-btn:active:not(.disabled) {
+    transform: scale(0.95);
+}
+
+.feature-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
