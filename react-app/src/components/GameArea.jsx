@@ -18,8 +18,13 @@ const GameArea = () => {
     
     const newEquipment = chopTree();
     if (newEquipment) {
-      // Show drop animation
-      setDropAnimation(newEquipment);
+      // Clear any existing drop animation before showing new one
+      setDropAnimation(null);
+      
+      // Show new drop animation after a brief moment
+      setTimeout(() => {
+        setDropAnimation(newEquipment);
+      }, 50);
       
       // Process equipment after animation starts
       setTimeout(() => {
