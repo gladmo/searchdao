@@ -111,6 +111,9 @@ const AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER = 0.5;
 const LEVEL_CONFIG = {
     chopsPerLevel: 10, // Tree chops required per level
     maxLevel: 100,
+    // Stamina configuration
+    baseStamina: 50, // Base stamina at level 1
+    staminaPerLevel: 5, // Additional stamina per level
     // Cultivation stages by level ranges
     cultivationStages: [
         { minLevel: 1, maxLevel: 10, stage: '炼气期', rank: '一阶' },
@@ -163,6 +166,11 @@ const COMBAT_POWER_DROP_CONFIG = {
     }
 };
 
+// Calculate max stamina based on level
+function calculateMaxStamina(level) {
+    return LEVEL_CONFIG.baseStamina + (level - 1) * LEVEL_CONFIG.staminaPerLevel;
+}
+
 // Equipment types and their icons
 const equipmentTypes = [
     { name: '武器', icon: '⚔️', type: 'weapon' },
@@ -197,7 +205,7 @@ function initGame() {
         const slot = e.target.closest('.equipment-slot');
         if (slot && !slot.classList.contains('empty')) {
             const type = slot.dataset.type;
-            disassembleEquipment(type);
+            showEquipmentDetailDialog(type);
         }
     });
 }
@@ -246,6 +254,14 @@ function loadGameState() {
         
         // Update cultivation stage based on level
         updateCultivationStage();
+        
+        // Update max stamina based on level
+        gameState.maxStamina = calculateMaxStamina(gameState.level);
+        
+        // Cap current stamina to max stamina if needed
+        if (gameState.stamina > gameState.maxStamina) {
+            gameState.stamina = gameState.maxStamina;
+        }
     }
 }
 
@@ -341,8 +357,21 @@ function checkLevelUp() {
         // Update cultivation stage
         updateCultivationStage();
         
-        // Show level up notification
-        showNotification(`🎉 恭喜升级到 ${gameState.level} 级！`);
+        // Update max stamina based on new level
+        const oldMaxStamina = gameState.maxStamina;
+        gameState.maxStamina = calculateMaxStamina(gameState.level);
+        
+        // Increase current stamina proportionally
+        const staminaIncrease = gameState.maxStamina - oldMaxStamina;
+        if (staminaIncrease > 0) {
+            gameState.stamina = Math.min(gameState.maxStamina, gameState.stamina + staminaIncrease);
+        }
+        
+        // Show level up notification with stamina increase info
+        const notificationMsg = staminaIncrease > 0 
+            ? `🎉 恭喜升级到 ${gameState.level} 级！修为上限增加${staminaIncrease}点`
+            : `🎉 恭喜升级到 ${gameState.level} 级！`;
+        showNotification(notificationMsg);
         
         // Add level up visual effect
         const levelIndicator = document.getElementById('levelUpIndicator');
@@ -758,6 +787,79 @@ function autoEquipCheck(newEquipment) {
     }
 }
 
+// Show equipment detail dialog with attributes and decompose button
+function showEquipmentDetailDialog(equipmentType) {
+    const equipment = gameState.equipment[equipmentType];
+    if (!equipment) return;
+    
+    // Remove any existing modal first to prevent multiple modals
+    const existingModal = document.querySelector('.equipment-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Calculate combat power
+    const power = calculateEquipmentPower(equipment);
+    const disassembleReward = calculateDisassembleReward(equipment);
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'equipment-modal';
+    modal.innerHTML = `
+        <div class="modal-content equipment-detail-modal">
+            <h3 class="modal-title">装备属性</h3>
+            
+            <div class="equipment-detail-card">
+                <div class="equipment-icon-large">${equipment.icon}</div>
+                <div class="equipment-name quality-${equipment.quality}">${QUALITY_NAMES[equipment.quality]} ${equipment.name}</div>
+                <div class="equipment-level">等级: ${equipment.level}</div>
+                <div class="equipment-stats">
+                    <div class="stat-row">攻击: ${equipment.attack}</div>
+                    <div class="stat-row">生命: ${equipment.life}</div>
+                    <div class="stat-row">防御: ${equipment.defense}</div>
+                    <div class="stat-row">敏捷: ${equipment.agility}</div>
+                </div>
+                ${formatAffixes(equipment)}
+                <div class="equipment-power">战力: ${Math.floor(power)}</div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn disassemble-btn">
+                    <span>分解</span>
+                    <span class="btn-detail">获得 ${disassembleReward} 灵石</span>
+                </button>
+                <button class="modal-btn close-btn">
+                    <span>关闭</span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Append modal to DOM first
+    document.body.appendChild(modal);
+    
+    // Add event listeners using querySelector on modal to avoid ID conflicts
+    const disassembleBtn = modal.querySelector('.disassemble-btn');
+    const closeBtn = modal.querySelector('.close-btn');
+    
+    const handleDisassemble = () => {
+        disassembleEquipment(equipmentType);
+        modal.remove();
+    };
+    
+    const handleClose = () => {
+        modal.remove();
+    };
+    
+    disassembleBtn.addEventListener('click', handleDisassemble);
+    closeBtn.addEventListener('click', handleClose);
+    
+    // Show modal with animation
+    requestAnimationFrame(() => {
+        modal.classList.add('show');
+    });
+}
+
 // Disassemble equipment
 function disassembleEquipment(equipmentType) {
     const equipment = gameState.equipment[equipmentType];
@@ -855,7 +957,7 @@ function renderEquipmentGrid() {
                     tooltip += `\n  ${affix.name}+${affix.value}`;
                 });
             }
-            tooltip += '\n点击分解';
+            tooltip += '\n点击查看详情';
             slot.title = tooltip;
         } else {
             // Empty slot
