@@ -48,6 +48,54 @@ const DEFENSE_MULTIPLIER = 2;
 // Disassemble reward calculation
 const DISASSEMBLE_REWARD_BASE = 10;
 
+// Affix system configuration
+const AFFIX_POOL = [
+    // Attack related
+    { name: '力道', type: 'attack', min: 5, max: 20, weight: 10 },
+    { name: '锋利', type: 'attack', min: 10, max: 30, weight: 8 },
+    { name: '破甲', type: 'attack', min: 8, max: 25, weight: 9 },
+    { name: '暴击', type: 'attack', min: 3, max: 15, weight: 7 },
+    
+    // Life related
+    { name: '生机', type: 'life', min: 50, max: 200, weight: 10 },
+    { name: '回春', type: 'life', min: 80, max: 250, weight: 8 },
+    { name: '护体', type: 'life', min: 60, max: 180, weight: 9 },
+    
+    // Defense related
+    { name: '坚固', type: 'defense', min: 3, max: 15, weight: 10 },
+    { name: '守护', type: 'defense', min: 5, max: 20, weight: 8 },
+    { name: '铁壁', type: 'defense', min: 4, max: 18, weight: 9 },
+    
+    // Agility related
+    { name: '迅捷', type: 'agility', min: 4, max: 18, weight: 10 },
+    { name: '轻灵', type: 'agility', min: 6, max: 22, weight: 8 },
+    { name: '闪避', type: 'agility', min: 5, max: 20, weight: 9 },
+    
+    // Special affixes
+    { name: '五行', type: 'multi', min: 3, max: 12, weight: 5 },
+    { name: '灵力', type: 'multi', min: 5, max: 15, weight: 6 },
+    { name: '神通', type: 'multi', min: 4, max: 13, weight: 5 }
+];
+
+// Affix count based on equipment level
+const AFFIX_LEVEL_CONFIG = {
+    getAffixCount: (level) => {
+        if (level < 10) return 0;  // No affixes for levels 1-9
+        if (level < 20) return 1;  // 1 affix for levels 10-19
+        if (level < 30) return 2;  // 2 affixes for levels 20-29
+        if (level < 50) return 3;  // 3 affixes for levels 30-49
+        if (level < 70) return 4;  // 4 affixes for levels 50-69
+        return 5;                   // 5 affixes for levels 70+
+    }
+};
+
+// Affix generation constants
+const MAX_AFFIX_SELECTION_ATTEMPTS = 20;
+const AFFIX_MULTI_TYPE_ATTACK_MULTIPLIER = 1.0;
+const AFFIX_MULTI_TYPE_LIFE_MULTIPLIER = 10;
+const AFFIX_MULTI_TYPE_DEFENSE_MULTIPLIER = 0.3;
+const AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER = 0.5;
+
 // Level system configuration
 const LEVEL_CONFIG = {
     chopsPerLevel: 10, // Tree chops required per level
@@ -272,6 +320,76 @@ function updateCultivationStage() {
     }
 }
 
+// Generate affixes for equipment based on level
+function generateAffixes(equipmentLevel, quality) {
+    const affixCount = AFFIX_LEVEL_CONFIG.getAffixCount(equipmentLevel);
+    if (affixCount === 0) return [];
+    
+    const affixes = [];
+    const usedAffixes = new Set(); // Prevent duplicate affixes
+    
+    // Calculate total weight for weighted random selection
+    const totalWeight = AFFIX_POOL.reduce((sum, affix) => sum + affix.weight, 0);
+    
+    for (let i = 0; i < affixCount; i++) {
+        let attempts = 0;
+        let selectedAffix = null;
+        
+        // Try to select a unique affix
+        while (attempts < MAX_AFFIX_SELECTION_ATTEMPTS && !selectedAffix) {
+            let random = Math.random() * totalWeight;
+            let accumulated = 0;
+            
+            for (const affix of AFFIX_POOL) {
+                accumulated += affix.weight;
+                if (random <= accumulated && !usedAffixes.has(affix.name)) {
+                    selectedAffix = affix;
+                    usedAffixes.add(affix.name);
+                    break;
+                }
+            }
+            attempts++;
+        }
+        
+        if (selectedAffix) {
+            // Calculate affix value based on level and quality
+            const levelMultiplier = Math.max(1, 1 + (equipmentLevel - 10) * 0.05); // 5% increase per level above 10, minimum 1
+            const qualityMultiplier = quality * 0.3; // 30% increase per quality level
+            const baseValue = selectedAffix.min + Math.random() * (selectedAffix.max - selectedAffix.min);
+            const finalValue = Math.floor(baseValue * levelMultiplier * (1 + qualityMultiplier));
+            
+            affixes.push({
+                name: selectedAffix.name,
+                type: selectedAffix.type,
+                value: finalValue
+            });
+        }
+    }
+    
+    return affixes;
+}
+
+// Apply affixes to equipment stats
+function applyAffixesToEquipment(equipment, affixes) {
+    affixes.forEach(affix => {
+        if (affix.type === 'attack') {
+            equipment.attack += affix.value;
+        } else if (affix.type === 'life') {
+            equipment.life += affix.value;
+        } else if (affix.type === 'defense') {
+            equipment.defense += affix.value;
+        } else if (affix.type === 'agility') {
+            equipment.agility += affix.value;
+        } else if (affix.type === 'multi') {
+            // Multi affixes add to all stats proportionally
+            equipment.attack += Math.floor(affix.value * AFFIX_MULTI_TYPE_ATTACK_MULTIPLIER);
+            equipment.life += Math.floor(affix.value * AFFIX_MULTI_TYPE_LIFE_MULTIPLIER);
+            equipment.defense += Math.floor(affix.value * AFFIX_MULTI_TYPE_DEFENSE_MULTIPLIER);
+            equipment.agility += Math.floor(affix.value * AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER);
+        }
+    });
+}
+
 // Drop equipment with random attributes
 function dropEquipment() {
     // Random equipment type
@@ -323,8 +441,14 @@ function dropEquipment() {
         attack: getRandomStat(baseStats),
         life: getRandomStat(baseStats * 10),
         defense: getRandomStat(baseStats * 0.3),
-        agility: getRandomStat(baseStats * 0.5)
+        agility: getRandomStat(baseStats * 0.5),
+        affixes: [] // Initialize affixes array
     };
+    
+    // Generate and apply affixes
+    const affixes = generateAffixes(level, quality);
+    equipment.affixes = affixes;
+    applyAffixesToEquipment(equipment, affixes);
     
     // Check if equipment of this type already exists
     const existingEquipment = gameState.equipment[equipment.type];
@@ -357,6 +481,22 @@ function createStatComparisonRow(statName, oldValue, newValue) {
     const comparison = newValue > oldValue ? 'better' : newValue < oldValue ? 'worse' : '';
     const indicator = newValue > oldValue ? ' ▲' : newValue < oldValue ? ' ▼' : '';
     return `<div class="stat-row ${comparison}">${statName}: ${newValue}${indicator}</div>`;
+}
+
+// Helper function to format affixes for display
+function formatAffixes(equipment) {
+    if (!equipment.affixes || equipment.affixes.length === 0) {
+        return '<div class="affixes-section"><div class="affixes-title">词条: 无</div></div>';
+    }
+    
+    const affixesHtml = equipment.affixes.map(affix => 
+        `<div class="affix-item">${affix.name}+${affix.value}</div>`
+    ).join('');
+    
+    return `<div class="affixes-section">
+        <div class="affixes-title">词条 (${equipment.affixes.length}):</div>
+        <div class="affixes-list">${affixesHtml}</div>
+    </div>`;
 }
 
 // Helper function to check if new equipment is better
@@ -407,6 +547,7 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
                         <div class="stat-row">防御: ${oldEquipment.defense}</div>
                         <div class="stat-row">敏捷: ${oldEquipment.agility}</div>
                     </div>
+                    ${formatAffixes(oldEquipment)}
                     <div class="equipment-power">战力: ${Math.floor(oldPower)}</div>
                 </div>
                 
@@ -428,6 +569,7 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
                         ${createStatComparisonRow('防御', oldEquipment.defense, newEquipment.defense)}
                         ${createStatComparisonRow('敏捷', oldEquipment.agility, newEquipment.agility)}
                     </div>
+                    ${formatAffixes(newEquipment)}
                     <div class="equipment-power ${powerDiff >= 0 ? 'better' : 'worse'}">战力: ${Math.floor(newPower)}</div>
                 </div>
             </div>
@@ -625,7 +767,17 @@ function renderEquipmentGrid() {
                 <div class="equipment-icon">${equip.icon}</div>
                 <div class="equipment-level">${equip.level}级</div>
             `;
-            slot.title = `${equip.name} ${equip.level}级\n攻击:${equip.attack} 生命:${equip.life}\n防御:${equip.defense} 敏捷:${equip.agility}\n点击分解`;
+            
+            // Build tooltip with affixes
+            let tooltip = `${equip.name} ${equip.level}级\n攻击:${equip.attack} 生命:${equip.life}\n防御:${equip.defense} 敏捷:${equip.agility}`;
+            if (equip.affixes && equip.affixes.length > 0) {
+                tooltip += '\n词条:';
+                equip.affixes.forEach(affix => {
+                    tooltip += `\n  ${affix.name}+${affix.value}`;
+                });
+            }
+            tooltip += '\n点击分解';
+            slot.title = tooltip;
         } else {
             // Empty slot
             slot.className = 'equipment-slot empty';
