@@ -47,7 +47,11 @@ export function generateEquipment(playerLevel, combatPower) {
   const attributeBonus = 1 + powerTier.attributeBonus;
   
   // Apply quality multiplier to base attributes
-  const qualityMultiplier = QUALITY_ATTRIBUTE_MULTIPLIERS[quality] || 1.0;
+  const qualityMultiplier = QUALITY_ATTRIBUTE_MULTIPLIERS[quality];
+  if (!qualityMultiplier) {
+    console.warn(`Invalid quality ${quality}, using 1.0 multiplier`);
+  }
+  const finalQualityMultiplier = qualityMultiplier || 1.0;
   
   const equipment = {
     id: Date.now() + Math.random(),
@@ -57,10 +61,10 @@ export function generateEquipment(playerLevel, combatPower) {
     level: equipmentLevel,
     quality: quality,
     qualityName: QUALITY_NAMES[quality],
-    attack: Math.max(1, Math.floor(baseAttack * attributeBonus * qualityMultiplier)),
-    life: Math.max(10, Math.floor(baseLife * attributeBonus * qualityMultiplier)),
-    defense: Math.max(1, Math.floor(baseDefense * attributeBonus * qualityMultiplier)),
-    agility: Math.max(1, Math.floor(baseAgility * attributeBonus * qualityMultiplier)),
+    attack: Math.max(1, Math.floor(baseAttack * attributeBonus * finalQualityMultiplier)),
+    life: Math.max(10, Math.floor(baseLife * attributeBonus * finalQualityMultiplier)),
+    defense: Math.max(1, Math.floor(baseDefense * attributeBonus * finalQualityMultiplier)),
+    agility: Math.max(1, Math.floor(baseAgility * attributeBonus * finalQualityMultiplier)),
     affixes: []
   };
   
