@@ -153,14 +153,37 @@
 }
 
 .affix-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 12px;
   color: #333;
-  padding: 4px 0;
+  padding: 6px 8px;
   border-bottom: 1px solid #e0e0e0;
+  background: white;
+  margin-bottom: 2px;
+  border-radius: 4px;
 }
 
 .affix-item:last-child {
   border-bottom: none;
+}
+
+.affix-item.empty {
+  color: #999;
+  font-style: italic;
+  justify-content: center;
+}
+
+.affix-name {
+  font-weight: 500;
+  color: #555;
+}
+
+.affix-value {
+  font-weight: bold;
+  color: #667eea;
+  margin-left: 8px;
 }
 
 .modal-actions {

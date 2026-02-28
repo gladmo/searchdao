@@ -83,19 +83,29 @@ const EquipmentComparisonModal = ({ oldEquipment, newEquipment, onClose }) => {
             <div className="affixes-section">
               <div className="affix-column">
                 <div className="affix-title">当前词条</div>
-                {oldEquipment.affixes?.map((affix, idx) => (
-                  <div key={idx} className="affix-item">
-                    {affix.name}+{affix.value}
-                  </div>
-                ))}
+                {oldEquipment.affixes?.length > 0 ? (
+                  oldEquipment.affixes.map((affix, idx) => (
+                    <div key={idx} className="affix-item">
+                      <span className="affix-name">{affix.name}</span>
+                      <span className="affix-value">+{affix.value}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="affix-item empty">无词条</div>
+                )}
               </div>
               <div className="affix-column">
                 <div className="affix-title">新装备词条</div>
-                {newEquipment.affixes?.map((affix, idx) => (
-                  <div key={idx} className="affix-item">
-                    {affix.name}+{affix.value}
-                  </div>
-                ))}
+                {newEquipment.affixes?.length > 0 ? (
+                  newEquipment.affixes.map((affix, idx) => (
+                    <div key={idx} className="affix-item">
+                      <span className="affix-name">{affix.name}</span>
+                      <span className="affix-value">+{affix.value}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="affix-item empty">无词条</div>
+                )}
               </div>
             </div>
           )}

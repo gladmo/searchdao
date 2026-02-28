@@ -1,0 +1,163 @@
+.drop-animation-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 300px;
+  z-index: 999;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Light beam from sky */
+.light-beam {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 400%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--beam-color) 30%,
+    var(--beam-color) 70%,
+    transparent 100%
+  );
+  opacity: 0.6;
+  filter: blur(var(--beam-blur));
+  animation: beamPulse 2s ease-in-out;
+}
+
+@keyframes beamPulse {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0);
+  }
+  20% {
+    opacity: 0.8;
+    transform: translateX(-50%) scaleY(1);
+  }
+  80% {
+    opacity: 0.8;
+    transform: translateX(-50%) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+
+/* Equipment drop animation */
+.equipment-drop {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: dropIn 2s ease-out;
+}
+
+@keyframes dropIn {
+  0% {
+    transform: translateY(-200px) scale(0.5);
+    opacity: 0;
+  }
+  30% {
+    transform: translateY(0) scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(10px) scale(0.95);
+  }
+  70% {
+    transform: translateY(0) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.equipment-icon {
+  font-size: 64px;
+  text-shadow: 0 0 20px currentColor;
+  animation: iconFloat 1s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.equipment-name {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.5s ease-out 0.3s both;
+  white-space: nowrap;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sparkle effects */
+.sparkles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+}
+
+.sparkle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px white;
+  animation: sparkleOut 1.5s ease-out var(--delay) infinite;
+  transform-origin: center;
+}
+
+@keyframes sparkleOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(80px);
+  }
+}
+
+/* Quality colors for glow effects */
+.quality-1 { color: #9e9e9e; }
+.quality-2 { color: #4caf50; }
+.quality-3 { color: #2196f3; }
+.quality-4 { color: #9c27b0; }
+.quality-5 { color: #ff9800; }
+.quality-6 { color: #f44336; }
+.quality-7 { color: #ffd700; }
