@@ -100,6 +100,9 @@ const AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER = 0.5;
 const LEVEL_CONFIG = {
     chopsPerLevel: 10, // Tree chops required per level
     maxLevel: 100,
+    // Stamina configuration
+    baseStamina: 50, // Base stamina at level 1
+    staminaPerLevel: 5, // Additional stamina per level
     // Cultivation stages by level ranges
     cultivationStages: [
         { minLevel: 1, maxLevel: 10, stage: '炼气期', rank: '一阶' },
@@ -151,6 +154,11 @@ const COMBAT_POWER_DROP_CONFIG = {
         return COMBAT_POWER_DROP_CONFIG.tiers[0];
     }
 };
+
+// Calculate max stamina based on level
+function calculateMaxStamina(level) {
+    return LEVEL_CONFIG.baseStamina + (level - 1) * LEVEL_CONFIG.staminaPerLevel;
+}
 
 // Equipment types and their icons
 const equipmentTypes = [
@@ -229,6 +237,14 @@ function loadGameState() {
         
         // Update cultivation stage based on level
         updateCultivationStage();
+        
+        // Update max stamina based on level
+        gameState.maxStamina = calculateMaxStamina(gameState.level);
+        
+        // Cap current stamina to max stamina if needed
+        if (gameState.stamina > gameState.maxStamina) {
+            gameState.stamina = gameState.maxStamina;
+        }
     }
 }
 
@@ -293,8 +309,16 @@ function checkLevelUp() {
         // Update cultivation stage
         updateCultivationStage();
         
+        // Update max stamina based on new level
+        const oldMaxStamina = gameState.maxStamina;
+        gameState.maxStamina = calculateMaxStamina(gameState.level);
+        
+        // Increase current stamina proportionally
+        const staminaIncrease = gameState.maxStamina - oldMaxStamina;
+        gameState.stamina = Math.min(gameState.maxStamina, gameState.stamina + staminaIncrease);
+        
         // Show level up notification
-        showNotification(`🎉 恭喜升级到 ${gameState.level} 级！`);
+        showNotification(`🎉 恭喜升级到 ${gameState.level} 级！修为上限增加${staminaIncrease}点`);
         
         // Add level up visual effect
         const levelIndicator = document.getElementById('levelUpIndicator');
