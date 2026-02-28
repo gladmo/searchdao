@@ -150,8 +150,12 @@ export const GameProvider = ({ children }) => {
   const chopTree = useCallback(() => {
     if (gameState.stamina < 1) {
       showNotification('修为不足！');
-      return;
+      return null;
     }
+
+    // Capture current level and combat power before state update
+    const currentLevel = gameState.level;
+    const currentCombatPower = gameState.combatPower;
 
     setGameState(prev => {
       const newState = {
@@ -162,8 +166,8 @@ export const GameProvider = ({ children }) => {
       return newState;
     });
 
-    // Drop equipment
-    const equipment = generateEquipment(gameState.level, gameState.combatPower);
+    // Drop equipment using captured values
+    const equipment = generateEquipment(currentLevel, currentCombatPower);
     addRecord(RECORD_TYPES.DROP, equipment);
     
     // Check level up
@@ -209,6 +213,23 @@ export const GameProvider = ({ children }) => {
     setTimeout(() => updateCombatPower(), 100);
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
   }, [gameState.equipment, addRecord, updateCombatPower, showNotification]);
+  
+  const autoDisassembleNewEquipment = useCallback((equipment) => {
+    const reward = calculateDisassembleReward(equipment);
+    
+    setGameState(prev => {
+      addRecord(RECORD_TYPES.DISASSEMBLE, equipment, { reward });
+      
+      return {
+        ...prev,
+        spiritStone: prev.spiritStone + reward,
+        disassembleCount: prev.disassembleCount + 1,
+        disassembleReward: prev.disassembleReward + reward
+      };
+    });
+    
+    return reward;
+  }, [addRecord]);
 
   const calculateDisassembleReward = (equipment) => {
     const baseReward = 10;
@@ -229,6 +250,7 @@ export const GameProvider = ({ children }) => {
     chopTree,
     equipNewEquipment,
     disassembleEquipment,
+    autoDisassembleNewEquipment,
     toggleAutoEquip,
     updateCombatPower,
     addRecord

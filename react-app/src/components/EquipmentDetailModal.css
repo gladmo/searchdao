@@ -15,60 +15,85 @@
   font-size: 48px;
 }
 
-.equipment-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+.base-attributes-section {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
   margin-bottom: 16px;
 }
 
-.equipment-stats .stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 8px;
-}
-
-.equipment-stats .stat-icon {
-  font-size: 20px;
-}
-
-.equipment-stats .stat-label {
-  flex: 1;
-  font-size: 14px;
-  color: #666;
-}
-
-.equipment-stats .stat-value {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-}
-
-.affixes-section {
-  background: #f9f9f9;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.affixes-title {
+.attributes-title {
   font-size: 14px;
   font-weight: bold;
   color: #666;
   margin-bottom: 12px;
 }
 
-.affixes-section .affix-item {
-  font-size: 14px;
-  color: #333;
-  padding: 8px 0;
+.attribute-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.affixes-section .affix-item:last-child {
+.attribute-entry:last-child {
   border-bottom: none;
+}
+
+.attribute-entry .attribute-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.attribute-entry .attribute-name {
+  flex: 1;
+  font-size: 14px;
+  color: #666;
+}
+
+.attribute-entry .attribute-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.affixes-section {
+  background: #fff9e6;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid #ffd700;
+}
+
+.affixes-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ff9800;
+  margin-bottom: 12px;
+}
+
+.affix-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ffe0b2;
+}
+
+.affix-entry:last-child {
+  border-bottom: none;
+}
+
+.affix-entry .affix-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.affix-entry .affix-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ff9800;
 }
 
 .btn-disassemble {

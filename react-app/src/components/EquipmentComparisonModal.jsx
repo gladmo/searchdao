@@ -30,11 +30,11 @@ const EquipmentComparisonModal = ({ oldEquipment, newEquipment, onClose }) => {
     return (
       <div className="stat-row" key={label}>
         <span className="stat-label">{label}</span>
-        <span className="stat-old">{oldValue}</span>
+        <span className="stat-old">{Math.floor(oldValue)}</span>
         <span className={`stat-diff ${diffClass}`}>
-          {diff !== 0 && `${arrow} ${Math.abs(diff)}`}
+          {diff !== 0 && `${arrow} ${Math.floor(Math.abs(diff))}`}
         </span>
-        <span className="stat-new">{newValue}</span>
+        <span className="stat-new">{Math.floor(newValue)}</span>
       </div>
     );
   };
