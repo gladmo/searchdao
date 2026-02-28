@@ -315,10 +315,15 @@ function checkLevelUp() {
         
         // Increase current stamina proportionally
         const staminaIncrease = gameState.maxStamina - oldMaxStamina;
-        gameState.stamina = Math.min(gameState.maxStamina, gameState.stamina + staminaIncrease);
+        if (staminaIncrease > 0) {
+            gameState.stamina = Math.min(gameState.maxStamina, gameState.stamina + staminaIncrease);
+        }
         
-        // Show level up notification
-        showNotification(`🎉 恭喜升级到 ${gameState.level} 级！修为上限增加${staminaIncrease}点`);
+        // Show level up notification with stamina increase info
+        const notificationMsg = staminaIncrease > 0 
+            ? `🎉 恭喜升级到 ${gameState.level} 级！修为上限增加${staminaIncrease}点`
+            : `🎉 恭喜升级到 ${gameState.level} 级！`;
+        showNotification(notificationMsg);
         
         // Add level up visual effect
         const levelIndicator = document.getElementById('levelUpIndicator');
