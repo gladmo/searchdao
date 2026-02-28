@@ -1,9 +1,12 @@
 import { MAX_RECORDS } from '../constants/gameConfig';
 
+// Counter for generating unique IDs
+let recordIdCounter = 0;
+
 // Add a record to the records array
 export const addRecord = (records, type, equipment, extraInfo = {}) => {
     const record = {
-        id: Date.now(),
+        id: `${Date.now()}-${recordIdCounter++}`,
         type: type,
         timestamp: new Date().toLocaleString('zh-CN'),
         equipment: {
