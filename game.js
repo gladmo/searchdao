@@ -24,8 +24,8 @@ const gameState = {
     defense: 0,
     agility: 0,
     
-    // Equipment
-    equipment: [],
+    // Equipment - slot-based system (one equipment per type)
+    equipment: {}, // Changed from array to object with type as key
     maxEquipment: 12,
     equipmentIdCounter: 0,
     
@@ -72,8 +72,8 @@ function initGame() {
     document.getElementById('equipmentGrid').addEventListener('click', (e) => {
         const slot = e.target.closest('.equipment-slot');
         if (slot && !slot.classList.contains('empty')) {
-            const index = parseInt(slot.dataset.index);
-            disassembleEquipment(index);
+            const type = slot.dataset.type;
+            disassembleEquipment(type);
         }
     });
 }
@@ -88,6 +88,20 @@ function loadGameState() {
     const saved = localStorage.getItem('searchdao_save');
     if (saved) {
         const loadedState = JSON.parse(saved);
+        
+        // Handle backward compatibility: convert array equipment to object
+        if (Array.isArray(loadedState.equipment)) {
+            const equipmentObj = {};
+            loadedState.equipment.forEach(equip => {
+                const existing = equipmentObj[equip.type];
+                // Keep the equipment with higher combat power
+                if (!existing || calculateEquipmentPower(equip) > calculateEquipmentPower(existing)) {
+                    equipmentObj[equip.type] = equip;
+                }
+            });
+            loadedState.equipment = equipmentObj;
+        }
+        
         Object.assign(gameState, loadedState);
         gameState.lastStaminaUpdate = Date.now();
         // Initialize equipmentIdCounter from loaded state
@@ -143,11 +157,6 @@ function chopTree() {
 
 // Drop equipment with random attributes
 function dropEquipment() {
-    if (gameState.equipment.length >= gameState.maxEquipment) {
-        showNotification('装备栏已满！');
-        return;
-    }
-    
     // Random equipment type
     const equipType = equipmentTypes[Math.floor(Math.random() * equipmentTypes.length)];
     
@@ -177,47 +186,217 @@ function dropEquipment() {
         agility: Math.floor(baseStats * 0.5 * (0.8 + Math.random() * 0.4))
     };
     
-    gameState.equipment.push(equipment);
+    // Check if equipment of this type already exists
+    const existingEquipment = gameState.equipment[equipment.type];
     
-    // Show notification
-    showNotification(`获得 ${QUALITY_NAMES[quality]} ${equipment.name} ${level}级`);
-    
-    // Auto equip if enabled and this is better than existing
-    if (gameState.autoEquip) {
-        autoEquipCheck(equipment);
+    if (existingEquipment) {
+        // Show comparison dialog if equipment of this type already exists
+        if (gameState.autoEquip) {
+            // Auto-equip: automatically choose better one
+            autoEquipCheck(equipment);
+        } else {
+            // Show comparison dialog
+            showEquipmentComparisonDialog(existingEquipment, equipment);
+        }
+    } else {
+        // No existing equipment of this type, equip directly
+        gameState.equipment[equipment.type] = equipment;
+        showNotification(`获得 ${QUALITY_NAMES[quality]} ${equipment.name} ${level}级`);
+        renderEquipmentGrid();
+        updateCombatPower();
     }
+}
+
+// Calculate equipment power
+function calculateEquipmentPower(equipment) {
+    return equipment.attack + equipment.life / LIFE_TO_POWER_RATIO + equipment.defense * DEFENSE_MULTIPLIER + equipment.agility;
+}
+
+// Helper function to create stat comparison row HTML
+function createStatComparisonRow(statName, oldValue, newValue) {
+    const comparison = newValue > oldValue ? 'better' : newValue < oldValue ? 'worse' : '';
+    const indicator = newValue > oldValue ? ' ▲' : newValue < oldValue ? ' ▼' : '';
+    return `<div class="stat-row ${comparison}">${statName}: ${newValue}${indicator}</div>`;
+}
+
+// Helper function to check if new equipment is better
+function isEquipmentBetter(newEquip, oldEquip) {
+    const oldPower = calculateEquipmentPower(oldEquip);
+    const newPower = calculateEquipmentPower(newEquip);
+    
+    // Compare by power first, then quality, then level
+    if (newPower !== oldPower) {
+        return newPower > oldPower;
+    }
+    if (newEquip.quality !== oldEquip.quality) {
+        return newEquip.quality > oldEquip.quality;
+    }
+    return newEquip.level > oldEquip.level;
+}
+
+// Show equipment comparison dialog
+function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
+    // Calculate combat power for each
+    const oldPower = calculateEquipmentPower(oldEquipment);
+    const newPower = calculateEquipmentPower(newEquipment);
+    const powerDiff = newPower - oldPower;
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'equipment-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3 class="modal-title">装备选择</h3>
+            <p class="modal-subtitle">已装备相同类型装备，请选择保留或替换</p>
+            
+            <div class="equipment-comparison">
+                <div class="equipment-card old">
+                    <div class="card-header">当前装备</div>
+                    <div class="equipment-icon-large">${oldEquipment.icon}</div>
+                    <div class="equipment-name quality-${oldEquipment.quality}">${QUALITY_NAMES[oldEquipment.quality]} ${oldEquipment.name}</div>
+                    <div class="equipment-level">等级: ${oldEquipment.level}</div>
+                    <div class="equipment-stats">
+                        <div class="stat-row">攻击: ${oldEquipment.attack}</div>
+                        <div class="stat-row">生命: ${oldEquipment.life}</div>
+                        <div class="stat-row">防御: ${oldEquipment.defense}</div>
+                        <div class="stat-row">敏捷: ${oldEquipment.agility}</div>
+                    </div>
+                    <div class="equipment-power">战力: ${Math.floor(oldPower)}</div>
+                </div>
+                
+                <div class="comparison-arrow">
+                    <div class="arrow-icon">➜</div>
+                    <div class="power-diff ${powerDiff >= 0 ? 'positive' : 'negative'}">
+                        ${powerDiff >= 0 ? '+' : ''}${Math.floor(powerDiff)}
+                    </div>
+                </div>
+                
+                <div class="equipment-card new">
+                    <div class="card-header">新装备</div>
+                    <div class="equipment-icon-large">${newEquipment.icon}</div>
+                    <div class="equipment-name quality-${newEquipment.quality}">${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}</div>
+                    <div class="equipment-level">等级: ${newEquipment.level}</div>
+                    <div class="equipment-stats">
+                        ${createStatComparisonRow('攻击', oldEquipment.attack, newEquipment.attack)}
+                        ${createStatComparisonRow('生命', oldEquipment.life, newEquipment.life)}
+                        ${createStatComparisonRow('防御', oldEquipment.defense, newEquipment.defense)}
+                        ${createStatComparisonRow('敏捷', oldEquipment.agility, newEquipment.agility)}
+                    </div>
+                    <div class="equipment-power ${powerDiff >= 0 ? 'better' : 'worse'}">战力: ${Math.floor(newPower)}</div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn disassemble-old" id="equipNewBtn">
+                    <span>装备新的</span>
+                    <span class="btn-detail">分解旧装备获得 ${calculateDisassembleReward(oldEquipment)} 灵石</span>
+                </button>
+                <button class="modal-btn disassemble-new" id="keepOldBtn">
+                    <span>保留旧的</span>
+                    <span class="btn-detail">分解新装备获得 ${calculateDisassembleReward(newEquipment)} 灵石</span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    document.getElementById('equipNewBtn').addEventListener('click', () => {
+        equipNewEquipment(oldEquipment, newEquipment);
+        document.body.removeChild(modal);
+    });
+    
+    document.getElementById('keepOldBtn').addEventListener('click', () => {
+        keepOldEquipment(oldEquipment, newEquipment);
+        document.body.removeChild(modal);
+    });
+    
+    // Show modal with animation
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+
+// Calculate equipment power
+function calculateEquipmentPower(equipment) {
+    return equipment.attack + equipment.life / LIFE_TO_POWER_RATIO + equipment.defense * DEFENSE_MULTIPLIER + equipment.agility;
+}
+
+// Equip new equipment and disassemble old one
+function equipNewEquipment(oldEquipment, newEquipment) {
+    const reward = calculateDisassembleReward(oldEquipment);
+    gameState.spiritStone += reward;
+    gameState.disassembleCount++;
+    gameState.disassembleReward += reward;
+    
+    // Replace with new equipment
+    gameState.equipment[newEquipment.type] = newEquipment;
+    
+    showNotification(`装备 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，分解旧装备获得 ${reward} 灵石`);
     
     renderEquipmentGrid();
     updateCombatPower();
+    updateUI();
+    saveGameState();
+}
+
+// Keep old equipment and disassemble new one
+function keepOldEquipment(oldEquipment, newEquipment) {
+    const reward = calculateDisassembleReward(newEquipment);
+    gameState.spiritStone += reward;
+    gameState.disassembleCount++;
+    gameState.disassembleReward += reward;
+    
+    showNotification(`保留旧装备，分解新装备获得 ${reward} 灵石`);
+    
+    updateUI();
+    saveGameState();
 }
 
 // Auto equip logic - automatically disassemble lower quality items of same type
 function autoEquipCheck(newEquipment) {
-    // Find equipment of same type with lower quality or level
-    for (let i = gameState.equipment.length - 2; i >= 0; i--) {
-        const existing = gameState.equipment[i];
-        if (existing.type === newEquipment.type) {
-            // If new equipment is better quality, or same quality but higher level
-            if (newEquipment.quality > existing.quality || 
-                (newEquipment.quality === existing.quality && newEquipment.level > existing.level)) {
-                // Auto-disassemble the weaker item
-                const reward = calculateDisassembleReward(existing);
-                gameState.spiritStone += reward;
-                gameState.disassembleCount++;
-                gameState.disassembleReward += reward;
-                gameState.equipment.splice(i, 1);
-                showNotification(`自动分解 ${existing.name}，获得 ${reward} 灵石`);
-                break;
-            }
-        }
+    const existing = gameState.equipment[newEquipment.type];
+    
+    if (!existing) {
+        // No existing equipment of this type, equip directly
+        gameState.equipment[newEquipment.type] = newEquipment;
+        showNotification(`获得 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name} ${newEquipment.level}级`);
+        renderEquipmentGrid();
+        updateCombatPower();
+        return;
+    }
+    
+    const oldPower = calculateEquipmentPower(existing);
+    const newPower = calculateEquipmentPower(newEquipment);
+    
+    // If new equipment is better, auto-equip it
+    if (isEquipmentBetter(newEquipment, existing)) {
+        // Auto-disassemble the weaker item
+        const reward = calculateDisassembleReward(existing);
+        gameState.spiritStone += reward;
+        gameState.disassembleCount++;
+        gameState.disassembleReward += reward;
+        
+        gameState.equipment[newEquipment.type] = newEquipment;
+        showNotification(`自动装备 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，分解旧装备获得 ${reward} 灵石`);
+        
+        renderEquipmentGrid();
+        updateCombatPower();
+    } else {
+        // New equipment is worse, auto-disassemble it
+        const reward = calculateDisassembleReward(newEquipment);
+        gameState.spiritStone += reward;
+        gameState.disassembleCount++;
+        gameState.disassembleReward += reward;
+        
+        showNotification(`获得 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，自动分解获得 ${reward} 灵石`);
     }
 }
 
 // Disassemble equipment
-function disassembleEquipment(index) {
-    if (index < 0 || index >= gameState.equipment.length) return;
+function disassembleEquipment(equipmentType) {
+    const equipment = gameState.equipment[equipmentType];
+    if (!equipment) return;
     
-    const equipment = gameState.equipment[index];
     const reward = calculateDisassembleReward(equipment);
     
     gameState.spiritStone += reward;
@@ -227,7 +406,7 @@ function disassembleEquipment(index) {
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
     
     // Remove equipment
-    gameState.equipment.splice(index, 1);
+    delete gameState.equipment[equipmentType];
     
     renderEquipmentGrid();
     updateCombatPower();
@@ -267,7 +446,7 @@ function calculateDisassembleReward(equipment) {
 function updateCombatPower() {
     let totalPower = 0;
     
-    gameState.equipment.forEach(equip => {
+    Object.values(gameState.equipment).forEach(equip => {
         totalPower += equip.attack + equip.life / LIFE_TO_POWER_RATIO + equip.defense * DEFENSE_MULTIPLIER + equip.agility;
     });
     
@@ -279,7 +458,7 @@ function updateCombatPower() {
     gameState.defense = 0;
     gameState.agility = 0;
     
-    gameState.equipment.forEach(equip => {
+    Object.values(gameState.equipment).forEach(equip => {
         gameState.attack += equip.attack;
         gameState.life += equip.life;
         gameState.defense += equip.defense;
@@ -292,25 +471,33 @@ function renderEquipmentGrid() {
     const grid = document.getElementById('equipmentGrid');
     grid.innerHTML = '';
     
-    // Render existing equipment
-    gameState.equipment.forEach((equip, index) => {
+    // Render slots for each equipment type
+    equipmentTypes.forEach(equipType => {
+        const equip = gameState.equipment[equipType.type];
         const slot = document.createElement('div');
-        slot.className = `equipment-slot quality-${equip.quality}`;
-        slot.dataset.index = index;
-        slot.innerHTML = `
-            <div class="equipment-icon">${equip.icon}</div>
-            <div class="equipment-level">${equip.level}级</div>
-        `;
-        slot.title = `${equip.name} ${equip.level}级\n攻击:${equip.attack} 生命:${equip.life}\n防御:${equip.defense} 敏捷:${equip.agility}\n点击分解`;
+        
+        if (equip) {
+            // Slot has equipment
+            slot.className = `equipment-slot quality-${equip.quality}`;
+            slot.dataset.type = equipType.type;
+            slot.innerHTML = `
+                <div class="equipment-icon">${equip.icon}</div>
+                <div class="equipment-level">${equip.level}级</div>
+            `;
+            slot.title = `${equip.name} ${equip.level}级\n攻击:${equip.attack} 生命:${equip.life}\n防御:${equip.defense} 敏捷:${equip.agility}\n点击分解`;
+        } else {
+            // Empty slot
+            slot.className = 'equipment-slot empty';
+            slot.dataset.type = equipType.type;
+            slot.innerHTML = `
+                <div class="equipment-icon empty-icon">${equipType.icon}</div>
+                <div class="equipment-type-name">${equipType.name}</div>
+            `;
+            slot.title = `${equipType.name}槽位（空）`;
+        }
+        
         grid.appendChild(slot);
     });
-    
-    // Fill remaining slots
-    for (let i = gameState.equipment.length; i < gameState.maxEquipment; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'equipment-slot empty';
-        grid.appendChild(slot);
-    }
 }
 
 // Update all UI elements
