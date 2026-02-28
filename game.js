@@ -89,6 +89,13 @@ const AFFIX_LEVEL_CONFIG = {
     }
 };
 
+// Affix generation constants
+const MAX_AFFIX_SELECTION_ATTEMPTS = 20;
+const AFFIX_MULTI_TYPE_ATTACK_MULTIPLIER = 1.0;
+const AFFIX_MULTI_TYPE_LIFE_MULTIPLIER = 10;
+const AFFIX_MULTI_TYPE_DEFENSE_MULTIPLIER = 0.3;
+const AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER = 0.5;
+
 // Level system configuration
 const LEVEL_CONFIG = {
     chopsPerLevel: 10, // Tree chops required per level
@@ -329,7 +336,7 @@ function generateAffixes(equipmentLevel, quality) {
         let selectedAffix = null;
         
         // Try to select a unique affix
-        while (attempts < 20 && !selectedAffix) {
+        while (attempts < MAX_AFFIX_SELECTION_ATTEMPTS && !selectedAffix) {
             let random = Math.random() * totalWeight;
             let accumulated = 0;
             
@@ -346,7 +353,7 @@ function generateAffixes(equipmentLevel, quality) {
         
         if (selectedAffix) {
             // Calculate affix value based on level and quality
-            const levelMultiplier = 1 + (equipmentLevel - 10) * 0.05; // 5% increase per level above 10
+            const levelMultiplier = Math.max(1, 1 + (equipmentLevel - 10) * 0.05); // 5% increase per level above 10, minimum 1
             const qualityMultiplier = quality * 0.3; // 30% increase per quality level
             const baseValue = selectedAffix.min + Math.random() * (selectedAffix.max - selectedAffix.min);
             const finalValue = Math.floor(baseValue * levelMultiplier * (1 + qualityMultiplier));
@@ -375,10 +382,10 @@ function applyAffixesToEquipment(equipment, affixes) {
             equipment.agility += affix.value;
         } else if (affix.type === 'multi') {
             // Multi affixes add to all stats proportionally
-            equipment.attack += Math.floor(affix.value * 1.0);
-            equipment.life += Math.floor(affix.value * 10);
-            equipment.defense += Math.floor(affix.value * 0.3);
-            equipment.agility += Math.floor(affix.value * 0.5);
+            equipment.attack += Math.floor(affix.value * AFFIX_MULTI_TYPE_ATTACK_MULTIPLIER);
+            equipment.life += Math.floor(affix.value * AFFIX_MULTI_TYPE_LIFE_MULTIPLIER);
+            equipment.defense += Math.floor(affix.value * AFFIX_MULTI_TYPE_DEFENSE_MULTIPLIER);
+            equipment.agility += Math.floor(affix.value * AFFIX_MULTI_TYPE_AGILITY_MULTIPLIER);
         }
     });
 }
