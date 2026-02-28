@@ -41,8 +41,15 @@ const gameState = {
     records: []
 };
 
-// Quality tier names
-const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗'];
+// Quality tier names - 7 quality levels
+// 1=普通(Normal), 2=精良(Fine), 3=稀有(Rare), 4=史诗(Epic), 5=传说(Legendary), 6=神话(Mythical), 7=不朽(Immortal)
+const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗', '传说', '神话', '不朽'];
+
+// Quality level for Epic and above (affixes start from Epic quality)
+const EPIC_QUALITY_THRESHOLD = 4;
+
+// Minimum drop rate for any quality tier (prevents zero probability)
+const MIN_QUALITY_DROP_RATE = 0.05;
 
 // Combat power calculation constants
 const LIFE_TO_POWER_RATIO = 10;
@@ -163,6 +170,30 @@ const COMBAT_POWER_DROP_CONFIG = {
             }
         }
         return COMBAT_POWER_DROP_CONFIG.tiers[0];
+    }
+};
+
+// Quality drop rate configuration
+const QUALITY_DROP_CONFIG = {
+    // Base drop rates for each quality (must sum to 1.0)
+    baseRates: {
+        normal: 0.40,      // 40% - 普通
+        fine: 0.30,        // 30% - 精良
+        rare: 0.18,        // 18% - 稀有
+        epic: 0.08,        // 8% - 史诗
+        legendary: 0.025,  // 2.5% - 传说
+        mythical: 0.010,   // 1.0% - 神话
+        immortal: 0.005    // 0.5% - 不朽
+    },
+    // How much combat power bonus affects each quality
+    powerMultipliers: {
+        normal: -2.0,      // Decreases significantly with power
+        fine: -1.0,        // Decreases with power
+        rare: 0.0,         // Stable
+        epic: 1.5,         // Increases with power
+        legendary: 1.0,    // Increases with power
+        mythical: 0.8,     // Increases with power
+        immortal: 0.5      // Increases slightly with power
     }
 };
 
@@ -397,8 +428,18 @@ function updateCultivationStage() {
     }
 }
 
-// Generate affixes for equipment based on level
+// Generate affixes for equipment based on level and quality
+// Only Epic quality (4) and above can have affixes
 function generateAffixes(equipmentLevel, quality) {
+    // Validate quality is within valid bounds
+    if (quality < 1 || quality >= QUALITY_NAMES.length) {
+        console.warn(`Invalid quality value: ${quality}. Defaulting to no affixes.`);
+        return [];
+    }
+    
+    // Only Epic quality and above can have affixes
+    if (quality < EPIC_QUALITY_THRESHOLD) return [];
+    
     const affixCount = AFFIX_LEVEL_CONFIG.getAffixCount(equipmentLevel);
     if (affixCount === 0) return [];
     
@@ -475,20 +516,52 @@ function dropEquipment() {
     // Get combat power tier for drop bonuses
     const powerTier = COMBAT_POWER_DROP_CONFIG.getTier(gameState.combatPower);
     
-    // Random quality (1-4) with combat power influence
+    // Random quality (1-7) with combat power influence
     // Higher combat power increases chance of higher quality
+    // 1=普通, 2=精良, 3=稀有, 4=史诗, 5=传说, 6=神话, 7=不朽
     const qualityRoll = Math.random();
     const qualityBonus = powerTier.qualityBonus;
     
-    let quality;
-    // Adjust drop rates based on combat power, prevent negative thresholds
-    const commonThreshold = Math.max(0, 0.5 - qualityBonus);
-    const uncommonThreshold = Math.max(commonThreshold, 0.8 - qualityBonus * 0.5);
+    // Calculate adjusted drop rates based on combat power
+    const rates = QUALITY_DROP_CONFIG.baseRates;
+    const multipliers = QUALITY_DROP_CONFIG.powerMultipliers;
     
-    if (qualityRoll < commonThreshold) quality = 1;      // Common (reduced with power)
-    else if (qualityRoll < uncommonThreshold) quality = 2; // Uncommon
-    else if (qualityRoll < 0.95) quality = 3;              // Rare (increased with power)
-    else quality = 4;                                       // Epic (slightly increased with power)
+    // Apply power bonus to each quality's base rate
+    // Note: Only normal and fine qualities need MIN_QUALITY_DROP_RATE protection
+    // because they have negative multipliers that could make them too small
+    const adjustedRates = {
+        normal: Math.max(MIN_QUALITY_DROP_RATE, rates.normal + qualityBonus * multipliers.normal),
+        fine: Math.max(MIN_QUALITY_DROP_RATE, rates.fine + qualityBonus * multipliers.fine),
+        rare: Math.max(0, rates.rare + qualityBonus * multipliers.rare),
+        epic: Math.max(0, rates.epic + qualityBonus * multipliers.epic),
+        legendary: Math.max(0, rates.legendary + qualityBonus * multipliers.legendary),
+        mythical: Math.max(0, rates.mythical + qualityBonus * multipliers.mythical),
+        immortal: Math.max(0, rates.immortal + qualityBonus * multipliers.immortal)
+    };
+    
+    // Normalize to ensure sum is 1.0 (totalRate is always > 0 due to MIN_QUALITY_DROP_RATE)
+    const totalRate = Object.values(adjustedRates).reduce((sum, rate) => sum + rate, 0);
+    Object.keys(adjustedRates).forEach(key => {
+        adjustedRates[key] /= totalRate;
+    });
+    
+    // Calculate cumulative thresholds
+    const normalThreshold = adjustedRates.normal;
+    const fineThreshold = normalThreshold + adjustedRates.fine;
+    const rareThreshold = fineThreshold + adjustedRates.rare;
+    const epicThreshold = rareThreshold + adjustedRates.epic;
+    const legendaryThreshold = epicThreshold + adjustedRates.legendary;
+    const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
+    
+    // Determine quality based on roll
+    let quality;
+    if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
+    else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
+    else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
+    else if (qualityRoll < epicThreshold) quality = 4;        // 史诗 Epic
+    else if (qualityRoll < legendaryThreshold) quality = 5;   // 传说 Legendary
+    else if (qualityRoll < mythicalThreshold) quality = 6;    // 神话 Mythical
+    else quality = 7;                                          // 不朽 Immortal
     
     // Random level (1 to player level + 2), capped at max level
     const maxEquipmentLevel = Math.min(gameState.level + 2, LEVEL_CONFIG.maxLevel);
