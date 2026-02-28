@@ -93,8 +93,11 @@ function loadGameState() {
         if (Array.isArray(loadedState.equipment)) {
             const equipmentObj = {};
             loadedState.equipment.forEach(equip => {
-                // Only keep the last (presumably best) equipment of each type
-                equipmentObj[equip.type] = equip;
+                const existing = equipmentObj[equip.type];
+                // Keep the equipment with higher combat power
+                if (!existing || calculateEquipmentPower(equip) > calculateEquipmentPower(existing)) {
+                    equipmentObj[equip.type] = equip;
+                }
             });
             loadedState.equipment = equipmentObj;
         }
@@ -204,6 +207,33 @@ function dropEquipment() {
     }
 }
 
+// Calculate equipment power
+function calculateEquipmentPower(equipment) {
+    return equipment.attack + equipment.life / LIFE_TO_POWER_RATIO + equipment.defense * DEFENSE_MULTIPLIER + equipment.agility;
+}
+
+// Helper function to create stat comparison row HTML
+function createStatComparisonRow(statName, oldValue, newValue) {
+    const comparison = newValue > oldValue ? 'better' : newValue < oldValue ? 'worse' : '';
+    const indicator = newValue > oldValue ? ' ▲' : newValue < oldValue ? ' ▼' : '';
+    return `<div class="stat-row ${comparison}">${statName}: ${newValue}${indicator}</div>`;
+}
+
+// Helper function to check if new equipment is better
+function isEquipmentBetter(newEquip, oldEquip) {
+    const oldPower = calculateEquipmentPower(oldEquip);
+    const newPower = calculateEquipmentPower(newEquip);
+    
+    // Compare by power first, then quality, then level
+    if (newPower !== oldPower) {
+        return newPower > oldPower;
+    }
+    if (newEquip.quality !== oldEquip.quality) {
+        return newEquip.quality > oldEquip.quality;
+    }
+    return newEquip.level > oldEquip.level;
+}
+
 // Show equipment comparison dialog
 function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
     // Calculate combat power for each
@@ -247,22 +277,10 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
                     <div class="equipment-name quality-${newEquipment.quality}">${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}</div>
                     <div class="equipment-level">等级: ${newEquipment.level}</div>
                     <div class="equipment-stats">
-                        <div class="stat-row ${newEquipment.attack > oldEquipment.attack ? 'better' : newEquipment.attack < oldEquipment.attack ? 'worse' : ''}">
-                            攻击: ${newEquipment.attack}
-                            ${newEquipment.attack > oldEquipment.attack ? ' ▲' : newEquipment.attack < oldEquipment.attack ? ' ▼' : ''}
-                        </div>
-                        <div class="stat-row ${newEquipment.life > oldEquipment.life ? 'better' : newEquipment.life < oldEquipment.life ? 'worse' : ''}">
-                            生命: ${newEquipment.life}
-                            ${newEquipment.life > oldEquipment.life ? ' ▲' : newEquipment.life < oldEquipment.life ? ' ▼' : ''}
-                        </div>
-                        <div class="stat-row ${newEquipment.defense > oldEquipment.defense ? 'better' : newEquipment.defense < oldEquipment.defense ? 'worse' : ''}">
-                            防御: ${newEquipment.defense}
-                            ${newEquipment.defense > oldEquipment.defense ? ' ▲' : newEquipment.defense < oldEquipment.defense ? ' ▼' : ''}
-                        </div>
-                        <div class="stat-row ${newEquipment.agility > oldEquipment.agility ? 'better' : newEquipment.agility < oldEquipment.agility ? 'worse' : ''}">
-                            敏捷: ${newEquipment.agility}
-                            ${newEquipment.agility > oldEquipment.agility ? ' ▲' : newEquipment.agility < oldEquipment.agility ? ' ▼' : ''}
-                        </div>
+                        ${createStatComparisonRow('攻击', oldEquipment.attack, newEquipment.attack)}
+                        ${createStatComparisonRow('生命', oldEquipment.life, newEquipment.life)}
+                        ${createStatComparisonRow('防御', oldEquipment.defense, newEquipment.defense)}
+                        ${createStatComparisonRow('敏捷', oldEquipment.agility, newEquipment.agility)}
                     </div>
                     <div class="equipment-power ${powerDiff >= 0 ? 'better' : 'worse'}">战力: ${Math.floor(newPower)}</div>
                 </div>
@@ -351,9 +369,7 @@ function autoEquipCheck(newEquipment) {
     const newPower = calculateEquipmentPower(newEquipment);
     
     // If new equipment is better, auto-equip it
-    if (newPower > oldPower || 
-        (newPower === oldPower && newEquipment.quality > existing.quality) ||
-        (newPower === oldPower && newEquipment.quality === existing.quality && newEquipment.level > existing.level)) {
+    if (isEquipmentBetter(newEquipment, existing)) {
         // Auto-disassemble the weaker item
         const reward = calculateDisassembleReward(existing);
         gameState.spiritStone += reward;
