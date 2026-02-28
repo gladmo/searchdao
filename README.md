@@ -2,6 +2,26 @@
 
 一个简单有趣的修仙题材放置类小游戏，核心玩法包括砍树、装备掉落、属性提升等。
 
+## 在线游玩
+
+访问 GitHub Pages: [https://gladmo.github.io/searchdao/](https://gladmo.github.io/searchdao/)
+
+## 本地运行
+
+直接在浏览器中打开 `index.html` 文件即可游玩。
+
+## 游戏特点
+
+- 🌳 砍树获取装备
+- ⚔️ 装备属性系统
+- 🔄 自动装备与分解
+- 💪 修为（体力）恢复机制
+- 📊 战力计算系统
+
+## 部署
+
+本项目使用 GitHub Actions 自动部署到 GitHub Pages。每次推送到 `main` 或 `master` 分支时会自动触发部署。
+
 ## 🎮 游戏特性
 
 - **砍树系统**：点击砍树按钮或直接点击树木进行砍伐
