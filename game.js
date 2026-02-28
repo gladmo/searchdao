@@ -305,6 +305,9 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
         </div>
     `;
     
+    // Append modal to DOM first
+    document.body.appendChild(modal);
+    
     // Add event listeners using querySelector on modal to avoid ID conflicts
     const equipNewBtn = modal.querySelector('.equip-new-btn');
     const keepOldBtn = modal.querySelector('.keep-old-btn');
@@ -321,8 +324,6 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
     
     equipNewBtn.addEventListener('click', handleEquipNew);
     keepOldBtn.addEventListener('click', handleKeepOld);
-    
-    document.body.appendChild(modal);
     
     // Show modal with animation
     setTimeout(() => modal.classList.add('show'), 10);
