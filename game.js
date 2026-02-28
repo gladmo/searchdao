@@ -236,6 +236,12 @@ function isEquipmentBetter(newEquip, oldEquip) {
 
 // Show equipment comparison dialog
 function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
+    // Remove any existing modal first to prevent multiple modals
+    const existingModal = document.querySelector('.equipment-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
     // Calculate combat power for each
     const oldPower = calculateEquipmentPower(oldEquipment);
     const newPower = calculateEquipmentPower(newEquipment);
@@ -287,11 +293,11 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
             </div>
             
             <div class="modal-actions">
-                <button class="modal-btn disassemble-old" id="equipNewBtn">
+                <button class="modal-btn disassemble-old equip-new-btn">
                     <span>装备新的</span>
                     <span class="btn-detail">分解旧装备获得 ${calculateDisassembleReward(oldEquipment)} 灵石</span>
                 </button>
-                <button class="modal-btn disassemble-new" id="keepOldBtn">
+                <button class="modal-btn disassemble-new keep-old-btn">
                     <span>保留旧的</span>
                     <span class="btn-detail">分解新装备获得 ${calculateDisassembleReward(newEquipment)} 灵石</span>
                 </button>
@@ -299,18 +305,25 @@ function showEquipmentComparisonDialog(oldEquipment, newEquipment) {
         </div>
     `;
     
+    // Append modal to DOM first
     document.body.appendChild(modal);
     
-    // Add event listeners
-    document.getElementById('equipNewBtn').addEventListener('click', () => {
-        equipNewEquipment(oldEquipment, newEquipment);
-        document.body.removeChild(modal);
-    });
+    // Add event listeners using querySelector on modal to avoid ID conflicts
+    const equipNewBtn = modal.querySelector('.equip-new-btn');
+    const keepOldBtn = modal.querySelector('.keep-old-btn');
     
-    document.getElementById('keepOldBtn').addEventListener('click', () => {
+    const handleEquipNew = () => {
+        equipNewEquipment(oldEquipment, newEquipment);
+        modal.remove();
+    };
+    
+    const handleKeepOld = () => {
         keepOldEquipment(oldEquipment, newEquipment);
-        document.body.removeChild(modal);
-    });
+        modal.remove();
+    };
+    
+    equipNewBtn.addEventListener('click', handleEquipNew);
+    keepOldBtn.addEventListener('click', handleKeepOld);
     
     // Show modal with animation
     setTimeout(() => modal.classList.add('show'), 10);
