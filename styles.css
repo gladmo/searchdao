@@ -837,3 +837,238 @@ body {
     border-radius: 3px;
     border-left: 2px solid #87ceeb;
 }
+
+/* Records Modal */
+.records-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.records-modal.show {
+    opacity: 1;
+}
+
+.records-content {
+    max-width: 600px;
+    max-height: 80vh;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.modal-close-btn {
+    background: rgba(255, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 0, 0, 0.5);
+}
+
+.records-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.records-list {
+    overflow-y: auto;
+    max-height: 50vh;
+    padding-right: 5px;
+}
+
+.records-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.records-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.records-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 4px;
+}
+
+.records-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.7);
+}
+
+.no-records {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 16px;
+}
+
+.record-item {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid #ffd700;
+    transition: background 0.2s ease;
+}
+
+.record-item:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.record-time {
+    color: #888;
+}
+
+.record-type {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.record-type-equipment_drop {
+    background: rgba(76, 175, 80, 0.3);
+    color: #76ff03;
+    border: 1px solid #76ff03;
+}
+
+.record-type-equipment_equip {
+    background: rgba(33, 150, 243, 0.3);
+    color: #64b5f6;
+    border: 1px solid #64b5f6;
+}
+
+.record-type-equipment_disassemble {
+    background: rgba(244, 67, 54, 0.3);
+    color: #ff8a80;
+    border: 1px solid #ff8a80;
+}
+
+.record-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.record-equipment {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.record-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.record-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.record-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.record-stats {
+    font-size: 11px;
+    color: #aaa;
+}
+
+.record-affixes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.affix-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: rgba(135, 206, 235, 0.2);
+    border: 1px solid #87ceeb;
+    border-radius: 10px;
+    color: #87ceeb;
+}
+
+.record-extra {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.record-reward {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.record-action {
+    color: #64b5f6;
+}
+
+.record-reason {
+    color: #ff8a80;
+}

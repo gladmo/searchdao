@@ -35,7 +35,10 @@ const gameState = {
     
     // Disassemble
     disassembleCount: 0,
-    disassembleReward: 0
+    disassembleReward: 0,
+    
+    // Records system - max 200 records
+    records: []
 };
 
 // Quality tier names
@@ -47,6 +50,14 @@ const DEFENSE_MULTIPLIER = 2;
 
 // Disassemble reward calculation
 const DISASSEMBLE_REWARD_BASE = 10;
+
+// Records system constants
+const MAX_RECORDS = 200;
+const RECORD_TYPES = {
+    DROP: 'equipment_drop',
+    EQUIP: 'equipment_equip', 
+    DISASSEMBLE: 'equipment_disassemble'
+};
 
 // Affix system configuration
 const AFFIX_POOL = [
@@ -179,6 +190,7 @@ function initGame() {
     document.getElementById('chopBtn').addEventListener('click', chopTree);
     document.getElementById('autoEquipBtn').addEventListener('click', toggleAutoEquip);
     document.getElementById('tree').addEventListener('click', chopTree);
+    document.getElementById('recordBtn').addEventListener('click', showRecordsModal);
     
     // Equipment grid click handling
     document.getElementById('equipmentGrid').addEventListener('click', (e) => {
@@ -227,9 +239,45 @@ function loadGameState() {
             gameState.chopCount = 0;
         }
         
+        // Initialize records if not present (backward compatibility)
+        if (!gameState.records) {
+            gameState.records = [];
+        }
+        
         // Update cultivation stage based on level
         updateCultivationStage();
     }
+}
+
+// Add record to the records list (max 200 records)
+function addRecord(type, equipment, extraInfo = {}) {
+    const record = {
+        id: Date.now() + Math.random(), // Unique ID
+        timestamp: Date.now(),
+        type: type,
+        equipment: {
+            name: equipment.name,
+            icon: equipment.icon,
+            quality: equipment.quality,
+            level: equipment.level,
+            attack: equipment.attack,
+            life: equipment.life,
+            defense: equipment.defense,
+            agility: equipment.agility,
+            affixes: equipment.affixes || []
+        },
+        ...extraInfo
+    };
+    
+    // Add to beginning of array
+    gameState.records.unshift(record);
+    
+    // Keep only the most recent 200 records
+    if (gameState.records.length > MAX_RECORDS) {
+        gameState.records = gameState.records.slice(0, MAX_RECORDS);
+    }
+    
+    saveGameState();
 }
 
 // Stamina recovery system
@@ -466,6 +514,10 @@ function dropEquipment() {
         // No existing equipment of this type, equip directly
         gameState.equipment[equipment.type] = equipment;
         showNotification(`获得 ${QUALITY_NAMES[quality]} ${equipment.name} ${level}级`);
+        
+        // Record equipment drop and equip
+        addRecord(RECORD_TYPES.DROP, equipment, { action: '掉落并装备' });
+        
         renderEquipmentGrid();
         updateCombatPower();
     }
@@ -623,6 +675,11 @@ function equipNewEquipment(oldEquipment, newEquipment) {
     
     showNotification(`装备 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，分解旧装备获得 ${reward} 灵石`);
     
+    // Record new equipment drop and equip
+    addRecord(RECORD_TYPES.DROP, newEquipment, { action: '掉落并装备' });
+    // Record old equipment disassemble
+    addRecord(RECORD_TYPES.DISASSEMBLE, oldEquipment, { reward: reward, reason: '替换装备' });
+    
     renderEquipmentGrid();
     updateCombatPower();
     updateUI();
@@ -638,6 +695,11 @@ function keepOldEquipment(oldEquipment, newEquipment) {
     
     showNotification(`保留旧装备，分解新装备获得 ${reward} 灵石`);
     
+    // Record new equipment drop (but not equipped)
+    addRecord(RECORD_TYPES.DROP, newEquipment, { action: '掉落未装备' });
+    // Record new equipment disassemble
+    addRecord(RECORD_TYPES.DISASSEMBLE, newEquipment, { reward: reward, reason: '保留旧装备' });
+    
     updateUI();
     saveGameState();
 }
@@ -650,6 +712,10 @@ function autoEquipCheck(newEquipment) {
         // No existing equipment of this type, equip directly
         gameState.equipment[newEquipment.type] = newEquipment;
         showNotification(`获得 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name} ${newEquipment.level}级`);
+        
+        // Record equipment drop and equip
+        addRecord(RECORD_TYPES.DROP, newEquipment, { action: '掉落并装备' });
+        
         renderEquipmentGrid();
         updateCombatPower();
         return;
@@ -669,6 +735,11 @@ function autoEquipCheck(newEquipment) {
         gameState.equipment[newEquipment.type] = newEquipment;
         showNotification(`自动装备 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，分解旧装备获得 ${reward} 灵石`);
         
+        // Record new equipment drop and equip
+        addRecord(RECORD_TYPES.DROP, newEquipment, { action: '掉落并装备' });
+        // Record old equipment disassemble
+        addRecord(RECORD_TYPES.DISASSEMBLE, existing, { reward: reward, reason: '自动装备替换' });
+        
         renderEquipmentGrid();
         updateCombatPower();
     } else {
@@ -679,6 +750,11 @@ function autoEquipCheck(newEquipment) {
         gameState.disassembleReward += reward;
         
         showNotification(`获得 ${QUALITY_NAMES[newEquipment.quality]} ${newEquipment.name}，自动分解获得 ${reward} 灵石`);
+        
+        // Record new equipment drop (but not equipped)
+        addRecord(RECORD_TYPES.DROP, newEquipment, { action: '掉落未装备' });
+        // Record new equipment disassemble
+        addRecord(RECORD_TYPES.DISASSEMBLE, newEquipment, { reward: reward, reason: '自动分解' });
     }
 }
 
@@ -694,6 +770,9 @@ function disassembleEquipment(equipmentType) {
     gameState.disassembleReward += reward;
     
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
+    
+    // Record manual disassemble
+    addRecord(RECORD_TYPES.DISASSEMBLE, equipment, { reward: reward, reason: '手动分解' });
     
     // Remove equipment
     delete gameState.equipment[equipmentType];
@@ -855,6 +934,130 @@ function showNotification(message) {
     setTimeout(() => {
         notification.classList.remove('show');
     }, 2000);
+}
+
+// Show records modal
+function showRecordsModal() {
+    // Remove any existing modal first
+    const existingModal = document.querySelector('.records-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'records-modal';
+    
+    // Format timestamp
+    const formatTime = (timestamp) => {
+        const date = new Date(timestamp);
+        return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+    };
+    
+    // Get record type name in Chinese
+    const getRecordTypeName = (type) => {
+        switch(type) {
+            case RECORD_TYPES.DROP: return '掉落';
+            case RECORD_TYPES.EQUIP: return '装备';
+            case RECORD_TYPES.DISASSEMBLE: return '分解';
+            default: return type;
+        }
+    };
+    
+    // Build records HTML
+    let recordsHtml = '';
+    if (gameState.records.length === 0) {
+        recordsHtml = '<div class="no-records">暂无记录</div>';
+    } else {
+        recordsHtml = gameState.records.map(record => {
+            const equip = record.equipment;
+            const power = equip.attack + equip.life / LIFE_TO_POWER_RATIO + equip.defense * DEFENSE_MULTIPLIER + equip.agility;
+            
+            let affixesHtml = '';
+            if (equip.affixes && equip.affixes.length > 0) {
+                affixesHtml = '<div class="record-affixes">' + 
+                    equip.affixes.map(affix => `<span class="affix-tag">${affix.name}+${affix.value}</span>`).join('') +
+                    '</div>';
+            }
+            
+            let extraInfo = '';
+            if (record.type === RECORD_TYPES.DISASSEMBLE && record.reward) {
+                extraInfo = `<span class="record-reward">+${record.reward}灵石</span>`;
+            }
+            if (record.action) {
+                extraInfo += `<span class="record-action">${record.action}</span>`;
+            }
+            if (record.reason) {
+                extraInfo += `<span class="record-reason">${record.reason}</span>`;
+            }
+            
+            return `
+                <div class="record-item">
+                    <div class="record-header">
+                        <span class="record-time">${formatTime(record.timestamp)}</span>
+                        <span class="record-type record-type-${record.type}">${getRecordTypeName(record.type)}</span>
+                    </div>
+                    <div class="record-content">
+                        <div class="record-equipment">
+                            <span class="record-icon">${equip.icon}</span>
+                            <div class="record-info">
+                                <div class="record-name quality-${equip.quality}">${QUALITY_NAMES[equip.quality]} ${equip.name} ${equip.level}级</div>
+                                <div class="record-stats">
+                                    攻:${equip.attack} 生:${equip.life} 防:${equip.defense} 敏:${equip.agility} | 战力:${Math.floor(power)}
+                                </div>
+                                ${affixesHtml}
+                            </div>
+                        </div>
+                        ${extraInfo ? `<div class="record-extra">${extraInfo}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-content records-content">
+            <div class="modal-header">
+                <h3 class="modal-title">装备记录</h3>
+                <button class="modal-close-btn">✕</button>
+            </div>
+            <div class="records-stats">
+                <div class="stat-item">
+                    <span class="stat-label">总记录数</span>
+                    <span class="stat-value">${gameState.records.length}/${MAX_RECORDS}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">分解总数</span>
+                    <span class="stat-value">${gameState.disassembleCount}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">分解灵石</span>
+                    <span class="stat-value">${gameState.disassembleReward}</span>
+                </div>
+            </div>
+            <div class="records-list">
+                ${recordsHtml}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add close button listener
+    const closeBtn = modal.querySelector('.modal-close-btn');
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+    
+    // Show modal with animation
+    setTimeout(() => modal.classList.add('show'), 10);
 }
 
 // Initialize game when page loads
