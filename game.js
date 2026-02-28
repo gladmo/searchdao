@@ -170,6 +170,30 @@ const COMBAT_POWER_DROP_CONFIG = {
     }
 };
 
+// Quality drop rate configuration
+const QUALITY_DROP_CONFIG = {
+    // Base drop rates for each quality (must sum to 1.0)
+    baseRates: {
+        normal: 0.40,      // 40% - 普通
+        fine: 0.30,        // 30% - 精良
+        rare: 0.18,        // 18% - 稀有
+        epic: 0.08,        // 8% - 史诗
+        legendary: 0.025,  // 2.5% - 传说
+        mythical: 0.010,   // 1.0% - 神话
+        immortal: 0.005    // 0.5% - 不朽
+    },
+    // How much combat power bonus affects each quality
+    powerMultipliers: {
+        normal: -2.0,      // Decreases significantly with power
+        fine: -1.0,        // Decreases with power
+        rare: 0.0,         // Stable
+        epic: 1.5,         // Increases with power
+        legendary: 1.0,    // Increases with power
+        mythical: 0.8,     // Increases with power
+        immortal: 0.5      // Increases slightly with power
+    }
+};
+
 // Calculate max stamina based on level
 function calculateMaxStamina(level) {
     return LEVEL_CONFIG.baseStamina + (level - 1) * LEVEL_CONFIG.staminaPerLevel;
@@ -489,16 +513,36 @@ function dropEquipment() {
     const qualityRoll = Math.random();
     const qualityBonus = powerTier.qualityBonus;
     
-    let quality;
-    // Progressive thresholds for quality levels
-    // Base drop rates (without power bonus): Normal 40%, Fine 30%, Rare 15%, Epic 10%, Legendary 3%, Mythical 1.5%, Immortal 0.5%
-    const normalThreshold = Math.max(0, 0.40 - qualityBonus * 0.8);      // 普通 - decreases fast with power
-    const fineThreshold = normalThreshold + Math.max(0, 0.30 - qualityBonus * 0.4);   // 精良 - decreases with power
-    const rareThreshold = fineThreshold + 0.15;                            // 稀有 - stable
-    const epicThreshold = rareThreshold + Math.min(0.20, 0.10 + qualityBonus * 0.4);  // 史诗 - increases with power
-    const legendaryThreshold = epicThreshold + Math.min(0.15, 0.03 + qualityBonus * 0.2); // 传说 - increases with power
-    const mythicalThreshold = legendaryThreshold + Math.min(0.10, 0.015 + qualityBonus * 0.15); // 神话 - increases slightly with power
+    // Calculate adjusted drop rates based on combat power
+    const rates = QUALITY_DROP_CONFIG.baseRates;
+    const multipliers = QUALITY_DROP_CONFIG.powerMultipliers;
     
+    // Apply power bonus to each quality's base rate
+    const adjustedRates = {
+        normal: Math.max(0.05, rates.normal + qualityBonus * multipliers.normal),
+        fine: Math.max(0.05, rates.fine + qualityBonus * multipliers.fine),
+        rare: rates.rare + qualityBonus * multipliers.rare,
+        epic: rates.epic + qualityBonus * multipliers.epic,
+        legendary: rates.legendary + qualityBonus * multipliers.legendary,
+        mythical: rates.mythical + qualityBonus * multipliers.mythical,
+        immortal: rates.immortal + qualityBonus * multipliers.immortal
+    };
+    
+    // Normalize to ensure sum is 1.0
+    const totalRate = Object.values(adjustedRates).reduce((sum, rate) => sum + rate, 0);
+    Object.keys(adjustedRates).forEach(key => {
+        adjustedRates[key] /= totalRate;
+    });
+    
+    // Calculate cumulative thresholds
+    const normalThreshold = adjustedRates.normal;
+    const fineThreshold = normalThreshold + adjustedRates.fine;
+    const rareThreshold = fineThreshold + adjustedRates.rare;
+    const epicThreshold = rareThreshold + adjustedRates.epic;
+    const legendaryThreshold = epicThreshold + adjustedRates.legendary;
+    const mythicalThreshold = legendaryThreshold + adjustedRates.mythical;
+    
+    let quality;
     if (qualityRoll < normalThreshold) quality = 1;           // 普通 Normal
     else if (qualityRoll < fineThreshold) quality = 2;        // 精良 Fine
     else if (qualityRoll < rareThreshold) quality = 3;        // 稀有 Rare
