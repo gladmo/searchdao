@@ -781,3 +781,28 @@ body {
         flex-direction: column;
     }
 }
+
+/* Level up animation */
+.level-up-indicator {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.level-up-flash {
+    animation: levelUpFlash 2s ease-in-out;
+}
+
+@keyframes levelUpFlash {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+    10%, 90% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(2) rotate(360deg);
+    }
+}
