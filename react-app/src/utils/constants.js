@@ -122,16 +122,16 @@ export const QUALITY_DROP_CONFIG = [
 ];
 
 // Quality attribute multipliers - higher quality = stronger base attributes
-// Quality 7 at 2.0x is roughly equivalent to +5 levels (which is ~1.5x)
+// Balanced to make Quality 7 competitive with equipment ~4-5 levels higher
 export const QUALITY_ATTRIBUTE_MULTIPLIERS = [
   0,     // Index 0 (unused)
   1.0,   // Quality 1 (普通) - baseline
-  1.1,   // Quality 2 (精良) - 10% boost
-  1.25,  // Quality 3 (稀有) - 25% boost
-  1.4,   // Quality 4 (史诗) - 40% boost
-  1.6,   // Quality 5 (传说) - 60% boost
-  1.8,   // Quality 6 (神话) - 80% boost
-  2.0    // Quality 7 (不朽) - 100% boost (~equivalent to +5 levels)
+  1.06,  // Quality 2 (精良) - 6% boost
+  1.13,  // Quality 3 (稀有) - 13% boost
+  1.20,  // Quality 4 (史诗) - 20% boost
+  1.28,  // Quality 5 (传说) - 28% boost
+  1.36,  // Quality 6 (神话) - 36% boost
+  1.45   // Quality 7 (不朽) - 45% boost
 ];
 
 // Equipment types
