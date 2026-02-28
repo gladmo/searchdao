@@ -124,6 +124,7 @@ export const GameProvider = ({ children }) => {
         return {
           ...prev,
           level: newLevel,
+          chopCount: prev.chopCount - requiredChops,
           maxStamina: newMaxStamina,
           stamina: Math.min(prev.stamina, newMaxStamina),
           cultivation
