@@ -327,6 +327,22 @@ body {
     border-color: #e91e63;
 }
 
+.equipment-slot.quality-5 {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    border-color: #ffc107;
+}
+
+.equipment-slot.quality-6 {
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    border-color: #ff4081;
+}
+
+.equipment-slot.quality-7 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    border-color: #ffeb3b;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
 .equipment-icon {
     font-size: 35px;
     margin-bottom: 3px;
@@ -1063,6 +1079,9 @@ body {
 .equipment-name.quality-2 { color: #4caf50; }
 .equipment-name.quality-3 { color: #2196f3; }
 .equipment-name.quality-4 { color: #e91e63; }
+.equipment-name.quality-5 { color: #ff9800; }
+.equipment-name.quality-6 { color: #ff4081; }
+.equipment-name.quality-7 { color: #ffd700; font-weight: bold; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
 
 .equipment-level {
     font-size: 14px;
