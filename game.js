@@ -13,6 +13,7 @@ const gameState = {
     
     // Level system
     level: 1,
+    chopCount: 0, // Total tree chops
     cultivation: {
         stage: '炼气前期',
         rank: '一阶'
@@ -46,6 +47,62 @@ const DEFENSE_MULTIPLIER = 2;
 
 // Disassemble reward calculation
 const DISASSEMBLE_REWARD_BASE = 10;
+
+// Level system configuration
+const LEVEL_CONFIG = {
+    chopsPerLevel: 10, // Tree chops required per level
+    maxLevel: 100,
+    // Cultivation stages by level ranges
+    cultivationStages: [
+        { minLevel: 1, maxLevel: 10, stage: '炼气期', rank: '一阶' },
+        { minLevel: 11, maxLevel: 20, stage: '筑基期', rank: '二阶' },
+        { minLevel: 21, maxLevel: 30, stage: '金丹期', rank: '三阶' },
+        { minLevel: 31, maxLevel: 40, stage: '元婴期', rank: '四阶' },
+        { minLevel: 41, maxLevel: 50, stage: '化神期', rank: '五阶' },
+        { minLevel: 51, maxLevel: 60, stage: '炼虚期', rank: '六阶' },
+        { minLevel: 61, maxLevel: 70, stage: '合体期', rank: '七阶' },
+        { minLevel: 71, maxLevel: 80, stage: '大乘期', rank: '八阶' },
+        { minLevel: 81, maxLevel: 90, stage: '渡劫期', rank: '九阶' },
+        { minLevel: 91, maxLevel: 100, stage: '飞升期', rank: '十阶' }
+    ]
+};
+
+// Level-based attribute configuration
+// Each level tier has different multipliers for equipment attributes
+const LEVEL_ATTRIBUTE_CONFIG = {
+    // Base multiplier increases with level
+    getBaseMultiplier: (level) => {
+        return 1 + (level - 1) * 0.1; // 10% increase per level
+    },
+    // Attribute variance increases at higher levels
+    getVariance: (level) => {
+        const baseVariance = 0.4; // ±40% at level 1
+        const levelBonus = level * 0.01; // +1% per level
+        return Math.min(0.8, baseVariance + levelBonus); // Max ±80%
+    }
+};
+
+// Combat power influence on drop rates
+const COMBAT_POWER_DROP_CONFIG = {
+    // Thresholds for drop rate bonuses
+    tiers: [
+        { minPower: 0, qualityBonus: 0, attrBonus: 0 },
+        { minPower: 1000, qualityBonus: 0.05, attrBonus: 0.1 },
+        { minPower: 5000, qualityBonus: 0.1, attrBonus: 0.2 },
+        { minPower: 10000, qualityBonus: 0.15, attrBonus: 0.3 },
+        { minPower: 20000, qualityBonus: 0.2, attrBonus: 0.4 },
+        { minPower: 50000, qualityBonus: 0.25, attrBonus: 0.5 }
+    ],
+    // Get current tier based on combat power
+    getTier: (combatPower) => {
+        for (let i = COMBAT_POWER_DROP_CONFIG.tiers.length - 1; i >= 0; i--) {
+            if (combatPower >= COMBAT_POWER_DROP_CONFIG.tiers[i].minPower) {
+                return COMBAT_POWER_DROP_CONFIG.tiers[i];
+            }
+        }
+        return COMBAT_POWER_DROP_CONFIG.tiers[0];
+    }
+};
 
 // Equipment types and their icons
 const equipmentTypes = [
@@ -111,10 +168,19 @@ function loadGameState() {
         
         Object.assign(gameState, loadedState);
         gameState.lastStaminaUpdate = Date.now();
+        
         // Initialize equipmentIdCounter from loaded state
         if (!gameState.equipmentIdCounter) {
             gameState.equipmentIdCounter = 0;
         }
+        
+        // Initialize chopCount if not present (backward compatibility)
+        if (gameState.chopCount === undefined) {
+            gameState.chopCount = 0;
+        }
+        
+        // Update cultivation stage based on level
+        updateCultivationStage();
     }
 }
 
@@ -149,6 +215,12 @@ function chopTree() {
     gameState.stamina -= staminaCost;
     gameState.lastStaminaUpdate = Date.now();
     
+    // Increment chop count
+    gameState.chopCount++;
+    
+    // Check for level up
+    checkLevelUp();
+    
     // Tree shake animation
     const tree = document.getElementById('tree');
     tree.classList.add('shake');
@@ -162,24 +234,81 @@ function chopTree() {
     saveGameState();
 }
 
+// Check for level up
+function checkLevelUp() {
+    const requiredChops = gameState.level * LEVEL_CONFIG.chopsPerLevel;
+    
+    if (gameState.chopCount >= requiredChops && gameState.level < LEVEL_CONFIG.maxLevel) {
+        gameState.level++;
+        gameState.chopCount = 0; // Reset chop count for next level
+        
+        // Update cultivation stage
+        updateCultivationStage();
+        
+        // Show level up notification
+        showNotification(`🎉 恭喜升级到 ${gameState.level} 级！`);
+        
+        // Add level up visual effect
+        const levelIndicator = document.getElementById('levelUpIndicator');
+        if (levelIndicator) {
+            levelIndicator.textContent = '✨';
+            levelIndicator.classList.add('level-up-flash');
+            setTimeout(() => {
+                levelIndicator.textContent = '';
+                levelIndicator.classList.remove('level-up-flash');
+            }, 2000);
+        }
+    }
+}
+
+// Update cultivation stage based on level
+function updateCultivationStage() {
+    for (const config of LEVEL_CONFIG.cultivationStages) {
+        if (gameState.level >= config.minLevel && gameState.level <= config.maxLevel) {
+            gameState.cultivation.stage = config.stage;
+            gameState.cultivation.rank = config.rank;
+            break;
+        }
+    }
+}
+
 // Drop equipment with random attributes
 function dropEquipment() {
     // Random equipment type
     const equipType = equipmentTypes[Math.floor(Math.random() * equipmentTypes.length)];
     
-    // Random quality (1-4, with higher quality being rarer)
+    // Get combat power tier for drop bonuses
+    const powerTier = COMBAT_POWER_DROP_CONFIG.getTier(gameState.combatPower);
+    
+    // Random quality (1-4) with combat power influence
+    // Higher combat power increases chance of higher quality
     const qualityRoll = Math.random();
+    const qualityBonus = powerTier.qualityBonus;
+    
     let quality;
-    if (qualityRoll < 0.5) quality = 1;      // 50% common
-    else if (qualityRoll < 0.8) quality = 2; // 30% uncommon
-    else if (qualityRoll < 0.95) quality = 3; // 15% rare
-    else quality = 4;                          // 5% epic
+    // Adjust drop rates based on combat power
+    if (qualityRoll < 0.5 - qualityBonus) quality = 1;      // Common (reduced with power)
+    else if (qualityRoll < 0.8 - qualityBonus * 0.5) quality = 2; // Uncommon
+    else if (qualityRoll < 0.95) quality = 3;                // Rare (increased with power)
+    else quality = 4;                                         // Epic (slightly increased with power)
     
     // Random level (1 to player level + 2)
     const level = Math.floor(Math.random() * (gameState.level + 2)) + 1;
     
-    // Calculate stats based on quality and level
-    const baseStats = level * 10 * quality;
+    // Get level-based multipliers
+    const baseMultiplier = LEVEL_ATTRIBUTE_CONFIG.getBaseMultiplier(gameState.level);
+    const variance = LEVEL_ATTRIBUTE_CONFIG.getVariance(gameState.level);
+    const attrBonus = 1 + powerTier.attrBonus; // Combat power attribute bonus
+    
+    // Calculate stats based on quality, level, player level, and combat power
+    const baseStats = level * 10 * quality * baseMultiplier * attrBonus;
+    
+    // Generate random variance for each attribute
+    const getRandomStat = (base) => {
+        const randomFactor = 1 - variance + Math.random() * variance * 2;
+        return Math.floor(base * randomFactor);
+    };
+    
     const equipment = {
         id: ++gameState.equipmentIdCounter,
         name: equipType.name,
@@ -187,10 +316,10 @@ function dropEquipment() {
         type: equipType.type,
         quality: quality,
         level: level,
-        attack: Math.floor(baseStats * (0.8 + Math.random() * 0.4)),
-        life: Math.floor(baseStats * 10 * (0.8 + Math.random() * 0.4)),
-        defense: Math.floor(baseStats * 0.3 * (0.8 + Math.random() * 0.4)),
-        agility: Math.floor(baseStats * 0.5 * (0.8 + Math.random() * 0.4))
+        attack: getRandomStat(baseStats),
+        life: getRandomStat(baseStats * 10),
+        defense: getRandomStat(baseStats * 0.3),
+        agility: getRandomStat(baseStats * 0.5)
     };
     
     // Check if equipment of this type already exists
@@ -523,9 +652,11 @@ function updateUI() {
     document.getElementById('defense').textContent = gameState.defense;
     document.getElementById('agility').textContent = gameState.agility;
     
-    // Level
+    // Level with progress
+    const requiredChops = gameState.level * LEVEL_CONFIG.chopsPerLevel;
+    const progress = gameState.chopCount;
     document.getElementById('cultivationLevel').textContent = 
-        `${gameState.level}级·${gameState.cultivation.stage}·${gameState.cultivation.rank}`;
+        `${gameState.level}级·${gameState.cultivation.stage}·${gameState.cultivation.rank} (${progress}/${requiredChops})`;
     
     // Disassemble info
     document.getElementById('disassembleReward').textContent = gameState.disassembleReward;
