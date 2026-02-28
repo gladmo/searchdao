@@ -1731,14 +1731,8 @@ body {
 .nav-btn,
 .wave-button,
 .modal-btn {
-    /* Improve touch responsiveness */
+    /* Improve touch responsiveness and prevent zoom on double-tap */
     -webkit-tap-highlight-color: rgba(255, 215, 0, 0.3);
-    touch-action: manipulation;
-}
-
-/* Prevent zoom on double-tap for game elements */
-.tree,
-.action-btn {
     touch-action: manipulation;
 }
 
@@ -1755,12 +1749,6 @@ body {
         min-width: 44px;
         min-height: 44px;
     }
-}
-
-/* Improve scrolling on mobile */
-.records-list,
-.modal-content {
-    -webkit-overflow-scrolling: touch;
 }
 
 /* Better active states for touch */
