@@ -837,3 +837,41 @@ body {
     border-radius: 3px;
     border-left: 2px solid #87ceeb;
 }
+
+/* Equipment detail modal specific styles */
+.equipment-detail-modal {
+    max-width: 400px;
+}
+
+.equipment-detail-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-btn.disassemble-btn {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    border: 2px solid #ff6b35;
+}
+
+.modal-btn.disassemble-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.5);
+}
+
+.modal-btn.close-btn {
+    background: linear-gradient(135deg, #666 0%, #555 100%);
+    color: white;
+    border: 2px solid #777;
+}
+
+.modal-btn.close-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(119, 119, 119, 0.5);
+}
