@@ -5,13 +5,13 @@ import './LevelDisplay.css';
 const LevelDisplay = () => {
   const { gameState } = useGame();
   
-  const requiredChops = gameState.level * 10;
-  const progress = gameState.chopCount % requiredChops;
+  const requiredCultivation = gameState.level * 100;
+  const progress = gameState.cultivationPoints % requiredCultivation;
   
   return (
     <div className="level-display">
       <span>
-        {gameState.level}级·{gameState.cultivation.stage}·{gameState.cultivation.rank} ({progress}/{requiredChops})
+        {gameState.level}级·{gameState.cultivation.stage}·{gameState.cultivation.rank} ({progress}/{requiredCultivation})
       </span>
     </div>
   );

@@ -32,6 +32,7 @@ export const GameProvider = ({ children }) => {
       lastStaminaUpdate: Date.now(),
       level: 1,
       chopCount: 0,
+      cultivationPoints: 0,
       cultivation: {
         stage: '炼气前期',
         rank: '一阶'
@@ -113,8 +114,8 @@ export const GameProvider = ({ children }) => {
 
   const checkLevelUp = useCallback(() => {
     setGameState(prev => {
-      const requiredChops = prev.level * 10;
-      if (prev.chopCount >= requiredChops) {
+      const requiredCultivation = prev.level * 100;
+      if (prev.cultivationPoints >= requiredCultivation) {
         const newLevel = prev.level + 1;
         const newMaxStamina = calculateMaxStamina(newLevel);
         const cultivation = updateCultivationStage(newLevel);
@@ -124,7 +125,7 @@ export const GameProvider = ({ children }) => {
         return {
           ...prev,
           level: newLevel,
-          chopCount: prev.chopCount - requiredChops,
+          cultivationPoints: prev.cultivationPoints - requiredCultivation,
           maxStamina: newMaxStamina,
           stamina: Math.min(prev.stamina, newMaxStamina),
           cultivation
@@ -162,7 +163,8 @@ export const GameProvider = ({ children }) => {
       const newState = {
         ...prev,
         stamina: prev.stamina - 1,
-        chopCount: prev.chopCount + 1
+        chopCount: prev.chopCount + 1,
+        cultivationPoints: prev.cultivationPoints + 10
       };
       return newState;
     });
