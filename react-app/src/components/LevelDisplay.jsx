@@ -1,11 +1,12 @@
 import React from 'react';
 import { useGame } from '../contexts/GameContext';
+import { CULTIVATION_POINTS_PER_LEVEL } from '../utils/constants';
 import './LevelDisplay.css';
 
 const LevelDisplay = () => {
   const { gameState } = useGame();
   
-  const requiredCultivation = gameState.level * 100;
+  const requiredCultivation = gameState.level * CULTIVATION_POINTS_PER_LEVEL;
   const progress = gameState.cultivationPoints % requiredCultivation;
   
   return (

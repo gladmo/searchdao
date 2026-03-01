@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadGameState, saveGameState } from '../utils/storage';
 import { calculateMaxStamina, calculateCombatPower, calculateEquipmentPower } from '../utils/calculations';
 import { generateEquipment, generateAffixes, applyAffixesToEquipment } from '../utils/equipment';
-import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS } from '../utils/constants';
+import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL } from '../utils/constants';
 
 const GameContext = createContext();
 
@@ -118,7 +118,7 @@ export const GameProvider = ({ children }) => {
 
   const checkLevelUp = useCallback(() => {
     setGameState(prev => {
-      const requiredCultivation = prev.level * 100;
+      const requiredCultivation = prev.level * CULTIVATION_POINTS_PER_LEVEL;
       if (prev.cultivationPoints >= requiredCultivation) {
         const newLevel = prev.level + 1;
         const newMaxStamina = calculateMaxStamina(newLevel);
@@ -168,7 +168,7 @@ export const GameProvider = ({ children }) => {
         ...prev,
         stamina: prev.stamina - 1,
         chopCount: prev.chopCount + 1,
-        cultivationPoints: prev.cultivationPoints + 10
+        cultivationPoints: prev.cultivationPoints + CULTIVATION_POINTS_PER_CHOP
       };
       return newState;
     });

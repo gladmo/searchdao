@@ -14,6 +14,10 @@ export const DEFENSE_MULTIPLIER = 2;
 // Disassemble reward calculation
 export const DISASSEMBLE_REWARD_BASE = 10;
 
+// Cultivation system constants
+export const CULTIVATION_POINTS_PER_CHOP = 10;
+export const CULTIVATION_POINTS_PER_LEVEL = 100;
+
 // Records system constants
 export const MAX_RECORDS = 200;
 export const RECORD_TYPES = {
