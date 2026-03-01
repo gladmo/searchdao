@@ -140,6 +140,46 @@ export const QUALITY_ATTRIBUTE_MULTIPLIERS = [
   1.55   // Quality 8 (至尊) - 55% boost
 ];
 
+// Skill system configuration - for Epic and above quality equipment
+export const SKILL_POOL = [
+  // Trigger skills (percentage-based per hit)
+  { name: '击晕', type: 'stun', category: 'trigger', min: 1, max: 15, weight: 8, powerMultiplier: 3.0 },
+  { name: '暴击', type: 'critical', category: 'trigger', min: 2, max: 20, weight: 10, powerMultiplier: 2.5 },
+  { name: '连击', type: 'combo', category: 'trigger', min: 2, max: 18, weight: 9, powerMultiplier: 2.8 },
+  { name: '闪避', type: 'dodge', category: 'trigger', min: 1, max: 16, weight: 9, powerMultiplier: 2.6 },
+  { name: '反击', type: 'counter', category: 'trigger', min: 1, max: 14, weight: 8, powerMultiplier: 2.7 },
+  { name: '吸血', type: 'lifesteal', category: 'trigger', min: 2, max: 20, weight: 9, powerMultiplier: 2.4 },
+  
+  // Resistance skills (percentage-based resistance)
+  { name: '击晕抗性', type: 'stun_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
+  { name: '暴击抗性', type: 'critical_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
+  { name: '连击抗性', type: 'combo_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
+  { name: '闪避抗性', type: 'dodge_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
+  { name: '反击抗性', type: 'counter_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
+  { name: '吸血抗性', type: 'lifesteal_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 }
+];
+
+// Skill count configuration based on equipment level and quality
+export const SKILL_LEVEL_CONFIG = {
+  getSkillCount: (level, quality) => {
+    // Only Epic (4) and above can have skills
+    if (quality < EPIC_QUALITY_THRESHOLD) return 0;
+    
+    // Skill count increases with level
+    if (level < 30) return 0;
+    if (level < 50) return 1;
+    if (level < 70) return 2;
+    if (level < 90) return 3;
+    return 4; // Max 4 skills for level 90+
+  },
+  
+  // Skill value scales with level - higher levels get better values
+  getLevelScaling: (level) => {
+    // Returns a multiplier from 1.0 (level 1) to 2.0 (level 100)
+    return 1.0 + Math.min(1.0, level / 100);
+  }
+};
+
 // Equipment types
 export const EQUIPMENT_TYPES = [
   { type: 'weapon', name: '武器', icon: '⚔️' },

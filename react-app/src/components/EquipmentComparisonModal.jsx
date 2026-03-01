@@ -109,6 +109,37 @@ const EquipmentComparisonModal = ({ oldEquipment, newEquipment, onClose }) => {
               </div>
             </div>
           )}
+          
+          {(oldEquipment.skills?.length > 0 || newEquipment.skills?.length > 0) && (
+            <div className="skills-section">
+              <div className="skill-column">
+                <div className="skill-title">当前技能</div>
+                {oldEquipment.skills?.length > 0 ? (
+                  oldEquipment.skills.map((skill, idx) => (
+                    <div key={idx} className={`skill-item skill-${skill.category}`}>
+                      <span className="skill-name">{skill.name}</span>
+                      <span className="skill-value">{skill.value}%</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="skill-item empty">无技能</div>
+                )}
+              </div>
+              <div className="skill-column">
+                <div className="skill-title">新装备技能</div>
+                {newEquipment.skills?.length > 0 ? (
+                  newEquipment.skills.map((skill, idx) => (
+                    <div key={idx} className={`skill-item skill-${skill.category}`}>
+                      <span className="skill-name">{skill.name}</span>
+                      <span className="skill-value">{skill.value}%</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="skill-item empty">无技能</div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="modal-actions">
