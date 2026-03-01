@@ -65,9 +65,9 @@ export const GameProvider = ({ children }) => {
     const interval = setInterval(() => {
       setGameState(prev => {
         const now = Date.now();
-        const timePassed = (now - prev.lastStaminaUpdate) / 1000;
+        const timePassed = (now - prev.lastStaminaUpdate) / 10000;
         const staminaToRecover = Math.floor(timePassed * prev.staminaRecoveryRate);
-        
+
         if (staminaToRecover > 0 && prev.stamina < prev.maxStamina) {
           const newStamina = Math.min(prev.maxStamina, prev.stamina + staminaToRecover);
           return {
@@ -78,7 +78,7 @@ export const GameProvider = ({ children }) => {
         }
         return prev;
       });
-    }, 1000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -97,12 +97,12 @@ export const GameProvider = ({ children }) => {
         equipment: { ...equipment },
         ...extraInfo
       };
-      
+
       const newRecords = [record, ...prev.records];
       if (newRecords.length > MAX_RECORDS) {
         newRecords.length = MAX_RECORDS;
       }
-      
+
       return { ...prev, records: newRecords };
     });
   }, []);
@@ -121,9 +121,9 @@ export const GameProvider = ({ children }) => {
         const newLevel = prev.level + 1;
         const newMaxStamina = calculateMaxStamina(newLevel);
         const cultivation = updateCultivationStage(newLevel);
-        
+
         showNotification(`✨ 恭喜升级！等级提升至 ${newLevel} 级 - ${cultivation.stage} ${cultivation.rank}`);
-        
+
         return {
           ...prev,
           level: newLevel,
@@ -174,10 +174,10 @@ export const GameProvider = ({ children }) => {
     // Drop equipment using captured values
     const equipment = generateEquipment(currentLevel, currentCombatPower);
     addRecord(RECORD_TYPES.DROP, equipment);
-    
+
     // Check level up
     setTimeout(() => checkLevelUp(), 100);
-    
+
     return equipment;
   }, [gameState.stamina, gameState.level, gameState.combatPower, showNotification, addRecord, checkLevelUp]);
 
@@ -185,12 +185,12 @@ export const GameProvider = ({ children }) => {
     setGameState(prev => {
       const newEquipment = { ...prev.equipment };
       newEquipment[equipment.type] = equipment;
-      
+
       addRecord(RECORD_TYPES.EQUIP, equipment);
-      
+
       return { ...prev, equipment: newEquipment };
     });
-    
+
     setTimeout(() => updateCombatPower(), 100);
   }, [addRecord, updateCombatPower]);
 
@@ -199,13 +199,13 @@ export const GameProvider = ({ children }) => {
     if (!equipment) return;
 
     const reward = calculateDisassembleReward(equipment);
-    
+
     setGameState(prev => {
       const newEquipment = { ...prev.equipment };
       delete newEquipment[equipmentType];
-      
+
       addRecord(RECORD_TYPES.DISASSEMBLE, equipment, { reward });
-      
+
       return {
         ...prev,
         equipment: newEquipment,
@@ -214,17 +214,17 @@ export const GameProvider = ({ children }) => {
         disassembleReward: prev.disassembleReward + reward
       };
     });
-    
+
     setTimeout(() => updateCombatPower(), 100);
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
   }, [gameState.equipment, addRecord, updateCombatPower, showNotification]);
-  
+
   const autoDisassembleNewEquipment = useCallback((equipment) => {
     const reward = calculateDisassembleReward(equipment);
-    
+
     setGameState(prev => {
       addRecord(RECORD_TYPES.DISASSEMBLE, equipment, { reward });
-      
+
       return {
         ...prev,
         spiritStone: prev.spiritStone + reward,
@@ -232,7 +232,7 @@ export const GameProvider = ({ children }) => {
         disassembleReward: prev.disassembleReward + reward
       };
     });
-    
+
     return reward;
   }, [addRecord]);
 
