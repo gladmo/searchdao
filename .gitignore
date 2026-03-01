@@ -1,12 +1,30 @@
-# Old vanilla JS files (keeping for reference but not deploying)
-game.js
-styles.css
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Node modules
-react-app/node_modules/
+node_modules
+dist
+dist-ssr
+*.local
 
-# Build outputs (generated from react-app/dist)
-# Don't ignore these as they're needed for GitHub Pages
-# assets/
-# index.html
-# vite.svg
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build outputs (generated from dist/ during deployment)
+# These are committed for GitHub Pages deployment
+assets/
+vite.svg
