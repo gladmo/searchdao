@@ -13,24 +13,26 @@
   justify-content: center;
 }
 
-/* Light beam from sky */
+/* Light beam from sky - Diablo 3 style thin focused beam */
 .light-beam {
   position: absolute;
   top: -100%;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
+  width: 35px;
   height: 400%;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    var(--beam-color) 30%,
-    var(--beam-color) 70%,
+    var(--beam-color) 20%,
+    var(--beam-color) 80%,
     transparent 100%
   );
-  opacity: 0.6;
-  filter: blur(var(--beam-blur));
+  opacity: 0.8;
+  /* Fixed blur for consistent focused beam effect across all quality levels */
+  filter: blur(8px);
   animation: beamPulse 2s ease-in-out;
+  box-shadow: 0 0 20px var(--beam-color), 0 0 40px var(--beam-color);
 }
 
 @keyframes beamPulse {
@@ -87,7 +89,6 @@
 .equipment-icon {
   font-size: 64px;
   text-shadow: 0 0 20px currentColor;
-  animation: iconFloat 1s ease-in-out infinite;
 }
 
 @keyframes iconFloat {

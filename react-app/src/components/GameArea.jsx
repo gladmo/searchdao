@@ -5,6 +5,10 @@ import EquipmentComparisonModal from './EquipmentComparisonModal';
 import DropAnimation from './DropAnimation';
 import './GameArea.css';
 
+// Animation delay to ensure previous drop animation is cleared before showing new one
+const ANIMATION_CLEAR_DELAY = 50;
+const EQUIPMENT_PROCESS_DELAY = 500;
+
 const GameArea = () => {
   const { gameState, chopTree, equipNewEquipment, disassembleEquipment, autoDisassembleNewEquipment, showNotification } = useGame();
   const [comparisonModal, setComparisonModal] = useState(null);
@@ -18,8 +22,13 @@ const GameArea = () => {
     
     const newEquipment = chopTree();
     if (newEquipment) {
-      // Show drop animation
-      setDropAnimation(newEquipment);
+      // Clear any existing drop animation before showing new one
+      setDropAnimation(null);
+      
+      // Show new drop animation after a brief moment
+      setTimeout(() => {
+        setDropAnimation(newEquipment);
+      }, ANIMATION_CLEAR_DELAY);
       
       // Process equipment after animation starts
       setTimeout(() => {
@@ -50,7 +59,7 @@ const GameArea = () => {
           equipNewEquipment(newEquipment);
           showNotification(`获得 ${newEquipment.qualityName} ${newEquipment.name}`);
         }
-      }, 500); // Delay to let animation start
+      }, EQUIPMENT_PROCESS_DELAY); // Delay to let animation start
     }
   };
   
