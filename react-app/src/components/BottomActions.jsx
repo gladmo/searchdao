@@ -2,16 +2,8 @@ import React from 'react';
 import { useGame } from '../contexts/GameContext';
 import './BottomActions.css';
 
-const BottomActions = () => {
-  const { gameState, chopTree, showNotification } = useGame();
-  
-  const handleChop = () => {
-    if (gameState.stamina < 1) {
-      showNotification('修为不足！');
-      return;
-    }
-    chopTree();
-  };
+const BottomActions = ({ handleChop }) => {
+  const { gameState } = useGame();
   
   return (
     <div className="bottom-actions">
