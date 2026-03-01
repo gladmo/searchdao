@@ -63,6 +63,18 @@ const EquipmentDetailModal = ({ equipment, onClose }) => {
               ))}
             </div>
           )}
+          
+          {equipment.skills && equipment.skills.length > 0 && (
+            <div className="skills-section">
+              <div className="skills-title">装备技能</div>
+              {equipment.skills.map((skill, idx) => (
+                <div key={idx} className={`skill-entry skill-${skill.category}`}>
+                  <span className="skill-name">{skill.name}</span>
+                  <span className="skill-value">{skill.value}%</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="modal-actions">

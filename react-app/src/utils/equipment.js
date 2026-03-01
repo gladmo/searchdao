@@ -8,7 +8,9 @@ import {
   AFFIX_POOL,
   AFFIX_LEVEL_CONFIG,
   EPIC_QUALITY_THRESHOLD,
-  QUALITY_ATTRIBUTE_MULTIPLIERS
+  QUALITY_ATTRIBUTE_MULTIPLIERS,
+  SKILL_POOL,
+  SKILL_LEVEL_CONFIG
 } from './constants';
 
 // Generate equipment with level and combat power bonuses
@@ -65,13 +67,18 @@ export function generateEquipment(playerLevel, combatPower) {
     life: Math.max(10, Math.floor(baseLife * attributeBonus * finalQualityMultiplier)),
     defense: Math.max(1, Math.floor(baseDefense * attributeBonus * finalQualityMultiplier)),
     agility: Math.max(1, Math.floor(baseAgility * attributeBonus * finalQualityMultiplier)),
-    affixes: []
+    affixes: [],
+    skills: []
   };
   
   // Generate affixes for Epic and above quality
   if (quality >= EPIC_QUALITY_THRESHOLD) {
     const affixes = generateAffixes(equipmentLevel, quality);
     applyAffixesToEquipment(equipment, affixes);
+    
+    // Generate skills for Epic and above quality
+    const skills = generateSkills(equipmentLevel, quality);
+    equipment.skills = skills;
   }
   
   return equipment;
@@ -175,6 +182,57 @@ export function applyAffixesToEquipment(equipment, affixes) {
   });
 }
 
+// Generate skills based on equipment level and quality
+export function generateSkills(equipmentLevel, quality) {
+  const skillCount = SKILL_LEVEL_CONFIG.getSkillCount(equipmentLevel, quality);
+  
+  if (skillCount === 0) {
+    return [];
+  }
+  
+  // Get level scaling multiplier
+  const levelScaling = SKILL_LEVEL_CONFIG.getLevelScaling(equipmentLevel);
+  
+  // Select unique skills
+  const selectedSkills = [];
+  const availableSkills = [...SKILL_POOL];
+  
+  for (let i = 0; i < skillCount && availableSkills.length > 0; i++) {
+    // Calculate total weight for remaining skills
+    const totalWeight = availableSkills.reduce((sum, skill) => sum + skill.weight, 0);
+    const rand = Math.random() * totalWeight;
+    let cumulative = 0;
+    let selectedIndex = -1;
+    
+    for (let j = 0; j < availableSkills.length; j++) {
+      cumulative += availableSkills[j].weight;
+      if (rand <= cumulative) {
+        selectedIndex = j;
+        break;
+      }
+    }
+    
+    if (selectedIndex !== -1) {
+      const skill = availableSkills[selectedIndex];
+      // Calculate skill value with level scaling
+      const baseValue = skill.min + Math.random() * (skill.max - skill.min);
+      const scaledValue = Math.floor(baseValue * levelScaling);
+      
+      selectedSkills.push({
+        name: skill.name,
+        type: skill.type,
+        category: skill.category,
+        value: scaledValue,
+        powerMultiplier: skill.powerMultiplier
+      });
+      
+      availableSkills.splice(selectedIndex, 1);
+    }
+  }
+  
+  return selectedSkills;
+}
+
 // Format affixes for display
 export function formatAffixes(equipment) {
   if (!equipment.affixes || equipment.affixes.length === 0) {
@@ -197,5 +255,18 @@ export function isEquipmentBetter(newEquip, oldEquip) {
 // Calculate equipment power
 export function calculateEquipmentPower(equipment) {
   if (!equipment) return 0;
-  return equipment.attack + equipment.life / 10 + equipment.defense * 2 + equipment.agility;
+  
+  // Base power from attributes
+  let power = equipment.attack + equipment.life / 10 + equipment.defense * 2 + equipment.agility;
+  
+  // Add skill power contribution
+  if (equipment.skills && equipment.skills.length > 0) {
+    const skillPower = equipment.skills.reduce((total, skill) => {
+      // Each skill contributes based on its value and power multiplier
+      return total + (skill.value * skill.powerMultiplier);
+    }, 0);
+    power += skillPower;
+  }
+  
+  return Math.floor(power);
 }
