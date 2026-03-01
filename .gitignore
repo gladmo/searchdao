@@ -27,4 +27,5 @@ dist-ssr
 # Build outputs (generated from dist/ during deployment)
 # These are committed for GitHub Pages deployment
 assets/
+/index.html
 vite.svg

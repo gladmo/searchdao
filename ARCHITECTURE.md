@@ -263,13 +263,12 @@ App (GameProvider)
 
 ```bash
 # 本地开发
-cd react-app
 npm run dev
 
 # 构建生产版本
 npm run build
 
-# 构建产物会输出到 react-app/dist/
+# 构建产物会输出到 dist/
 # GitHub Actions会自动复制到根目录并部署
 ```
 
