@@ -7,7 +7,8 @@ import {
   LEVEL_ATTRIBUTE_CONFIG,
   AFFIX_POOL,
   AFFIX_LEVEL_CONFIG,
-  EPIC_QUALITY_THRESHOLD
+  EPIC_QUALITY_THRESHOLD,
+  QUALITY_ATTRIBUTE_MULTIPLIERS
 } from './constants';
 
 // Generate equipment with level and combat power bonuses
@@ -45,6 +46,13 @@ export function generateEquipment(playerLevel, combatPower) {
   // Apply combat power bonus to attributes
   const attributeBonus = 1 + powerTier.attributeBonus;
   
+  // Apply quality multiplier to base attributes
+  const qualityMultiplier = QUALITY_ATTRIBUTE_MULTIPLIERS[quality];
+  if (!qualityMultiplier) {
+    console.warn(`Invalid quality ${quality}, using 1.0 multiplier`);
+  }
+  const finalQualityMultiplier = qualityMultiplier || 1.0;
+  
   const equipment = {
     id: Date.now() + Math.random(),
     type: equipType.type,
@@ -53,10 +61,10 @@ export function generateEquipment(playerLevel, combatPower) {
     level: equipmentLevel,
     quality: quality,
     qualityName: QUALITY_NAMES[quality],
-    attack: Math.max(1, Math.floor(baseAttack * attributeBonus)),
-    life: Math.max(10, Math.floor(baseLife * attributeBonus)),
-    defense: Math.max(1, Math.floor(baseDefense * attributeBonus)),
-    agility: Math.max(1, Math.floor(baseAgility * attributeBonus)),
+    attack: Math.max(1, Math.floor(baseAttack * attributeBonus * finalQualityMultiplier)),
+    life: Math.max(10, Math.floor(baseLife * attributeBonus * finalQualityMultiplier)),
+    defense: Math.max(1, Math.floor(baseDefense * attributeBonus * finalQualityMultiplier)),
+    agility: Math.max(1, Math.floor(baseAgility * attributeBonus * finalQualityMultiplier)),
     affixes: []
   };
   

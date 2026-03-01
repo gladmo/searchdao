@@ -121,6 +121,19 @@ export const QUALITY_DROP_CONFIG = [
   { quality: 7, baseRate: 0.00, powerMultiplier: 3.0 }   // 不朽
 ];
 
+// Quality attribute multipliers - higher quality = stronger base attributes
+// Balanced to make Quality 7 competitive with equipment ~4-5 levels higher
+export const QUALITY_ATTRIBUTE_MULTIPLIERS = [
+  0,     // Index 0 (unused)
+  1.0,   // Quality 1 (普通) - baseline
+  1.06,  // Quality 2 (精良) - 6% boost
+  1.13,  // Quality 3 (稀有) - 13% boost
+  1.20,  // Quality 4 (史诗) - 20% boost
+  1.28,  // Quality 5 (传说) - 28% boost
+  1.36,  // Quality 6 (神话) - 36% boost
+  1.45   // Quality 7 (不朽) - 45% boost
+];
+
 // Equipment types
 export const EQUIPMENT_TYPES = [
   { type: 'weapon', name: '武器', icon: '⚔️' },
