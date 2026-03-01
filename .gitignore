@@ -25,7 +25,6 @@ dist-ssr
 *.sw?
 
 # Build outputs (generated from dist/ during deployment)
-# These are committed for GitHub Pages deployment
+# Source files are kept in root, generated files temporarily copied during CI
 assets/
-/index.html
 vite.svg
