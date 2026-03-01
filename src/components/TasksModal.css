@@ -1,0 +1,236 @@
+.tasks-modal {
+  max-width: 600px;
+  max-height: 80vh;
+  width: 90%;
+}
+
+.tasks-modal .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.no-tasks {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-item {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  border-color: #666;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.task-item.completed {
+  border-color: #4caf50;
+  background: linear-gradient(135deg, #2d3d2d 0%, #1a2a1a 100%);
+}
+
+.task-item.claimed {
+  opacity: 0.6;
+  border-color: #666;
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.task-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.task-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  color: #ffd700;
+}
+
+.task-description {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #aaa;
+}
+
+.task-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0.5rem;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.reward-label {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-bottom: 0.25rem;
+}
+
+.reward-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.task-progress {
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #333;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+  border: 1px solid #555;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  transition: width 0.3s ease;
+  border-radius: 10px;
+}
+
+.task-item.completed .progress-fill {
+  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-align: right;
+}
+
+.claim-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+}
+
+.claim-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.claim-button:active {
+  transform: scale(0.98);
+}
+
+.claimed-badge {
+  width: 100%;
+  padding: 0.5rem;
+  background: #444;
+  color: #999;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.modal-footer {
+  border-top: 1px solid #444;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.tasks-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.claimable-hint {
+  color: #ffd700;
+  font-weight: bold;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .tasks-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .task-header {
+    flex-wrap: wrap;
+  }
+
+  .task-reward {
+    width: 100%;
+    margin-top: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .task-icon {
+    font-size: 1.5rem;
+  }
+
+  .task-name {
+    font-size: 1rem;
+  }
+}

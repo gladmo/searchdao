@@ -26,6 +26,118 @@ export const RECORD_TYPES = {
   DISASSEMBLE: 'equipment_disassemble'
 };
 
+// Task system constants
+export const TASK_TYPES = {
+  CHOP: 'chop',           // 砍树任务
+  EQUIP: 'equip',         // 装备任务
+  DISASSEMBLE: 'disassemble', // 分解装备任务
+  COMBAT_POWER: 'combat_power', // 战力提升任务
+  COLLECT_SPIRIT: 'collect_spirit' // 收集灵石任务
+};
+
+// Task configuration based on level ranges
+// Tasks are level-appropriate: requirements scale with player level
+export const TASK_CONFIG = [
+  // Level 1-9: 炼气期 tasks - basic training
+  {
+    minLevel: 1,
+    maxLevel: 9,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '初窥门径', description: '砍树修炼', target: 10, reward: 50, icon: '🌳' },
+      { type: TASK_TYPES.EQUIP, name: '武装自己', description: '装备任意装备', target: 3, reward: 30, icon: '⚔️' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '实力初成', description: '战力达到目标', target: 100, reward: 40, icon: '💪' }
+    ]
+  },
+  // Level 10-19: 筑基期 tasks - foundation building
+  {
+    minLevel: 10,
+    maxLevel: 19,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '筑基修行', description: '砍树修炼', target: 30, reward: 150, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器入门', description: '分解装备', target: 10, reward: 100, icon: '♻️' },
+      { type: TASK_TYPES.EQUIP, name: '精益求精', description: '装备任意装备', target: 8, reward: 120, icon: '⚔️' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '筑基之力', description: '战力达到目标', target: 500, reward: 130, icon: '💪' }
+    ]
+  },
+  // Level 20-29: 金丹期 tasks - forming the golden core
+  {
+    minLevel: 20,
+    maxLevel: 29,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '金丹淬炼', description: '砍树修炼', target: 50, reward: 300, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器精通', description: '分解装备', target: 25, reward: 250, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '聚灵成丹', description: '收集灵石', target: 5000, reward: 280, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '金丹之威', description: '战力达到目标', target: 2000, reward: 320, icon: '💪' }
+    ]
+  },
+  // Level 30-39: 元婴期 tasks - nascent soul
+  {
+    minLevel: 30,
+    maxLevel: 39,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '元婴孕育', description: '砍树修炼', target: 80, reward: 500, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器大师', description: '分解装备', target: 40, reward: 450, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石万千', description: '收集灵石', target: 15000, reward: 480, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '元婴之能', description: '战力达到目标', target: 5000, reward: 520, icon: '💪' }
+    ]
+  },
+  // Level 40-49: 化神期 tasks - spirit transformation
+  {
+    minLevel: 40,
+    maxLevel: 49,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '化神蜕变', description: '砍树修炼', target: 120, reward: 800, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器宗师', description: '分解装备', target: 60, reward: 700, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石如海', description: '收集灵石', target: 30000, reward: 750, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '化神之力', description: '战力达到目标', target: 15000, reward: 850, icon: '💪' }
+    ]
+  },
+  // Level 50-59: 炼虚期 tasks - void refinement
+  {
+    minLevel: 50,
+    maxLevel: 59,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '炼虚归一', description: '砍树修炼', target: 150, reward: 1200, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器圣手', description: '分解装备', target: 80, reward: 1000, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石无尽', description: '收集灵石', target: 50000, reward: 1100, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '炼虚之威', description: '战力达到目标', target: 30000, reward: 1300, icon: '💪' }
+    ]
+  },
+  // Level 60-69: 合体期 tasks - integration
+  {
+    minLevel: 60,
+    maxLevel: 69,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '合体之道', description: '砍树修炼', target: 200, reward: 1800, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器至尊', description: '分解装备', target: 100, reward: 1500, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石成山', description: '收集灵石', target: 80000, reward: 1650, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '合体之能', description: '战力达到目标', target: 60000, reward: 1950, icon: '💪' }
+    ]
+  },
+  // Level 70-89: 大乘期 tasks - mahayana
+  {
+    minLevel: 70,
+    maxLevel: 89,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '大乘悟道', description: '砍树修炼', target: 250, reward: 2500, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器神匠', description: '分解装备', target: 130, reward: 2200, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石连城', description: '收集灵石', target: 120000, reward: 2350, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '大乘之力', description: '战力达到目标', target: 100000, reward: 2700, icon: '💪' }
+    ]
+  },
+  // Level 90+: 渡劫期及以上 tasks - tribulation and beyond
+  {
+    minLevel: 90,
+    maxLevel: 999,
+    tasks: [
+      { type: TASK_TYPES.CHOP, name: '渡劫圆满', description: '砍树修炼', target: 300, reward: 3500, icon: '🌳' },
+      { type: TASK_TYPES.DISASSEMBLE, name: '炼器神尊', description: '分解装备', target: 150, reward: 3000, icon: '♻️' },
+      { type: TASK_TYPES.COLLECT_SPIRIT, name: '灵石无量', description: '收集灵石', target: 200000, reward: 3200, icon: '💎' },
+      { type: TASK_TYPES.COMBAT_POWER, name: '渡劫之威', description: '战力达到目标', target: 200000, reward: 3800, icon: '💪' }
+    ]
+  }
+];
+
 // Affix system configuration
 export const AFFIX_POOL = [
   // Attack related

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadGameState, saveGameState } from '../utils/storage';
 import { calculateMaxStamina, calculateCombatPower, calculateEquipmentPower } from '../utils/calculations';
 import { generateEquipment, generateAffixes, applyAffixesToEquipment } from '../utils/equipment';
-import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL } from '../utils/constants';
+import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL, TASK_CONFIG, TASK_TYPES } from '../utils/constants';
 
 const GameContext = createContext();
 
@@ -15,6 +15,20 @@ export const useGame = () => {
 };
 
 export const GameProvider = ({ children }) => {
+  // Helper function to generate tasks for current level
+  const generateTasksForLevel = (level) => {
+    const config = TASK_CONFIG.find(c => level >= c.minLevel && level <= c.maxLevel);
+    if (!config) return [];
+    
+    return config.tasks.map((task, index) => ({
+      id: `task_${level}_${index}`,
+      ...task,
+      progress: 0,
+      completed: false,
+      claimed: false
+    }));
+  };
+
   const [gameState, setGameState] = useState(() => {
     const saved = loadGameState();
     if (saved) {
@@ -22,6 +36,10 @@ export const GameProvider = ({ children }) => {
       saved.maxStamina = calculateMaxStamina(saved.level);
       // Initialize cultivationPoints if not present (for backward compatibility)
       saved.cultivationPoints = saved.cultivationPoints ?? 0;
+      // Initialize tasks if not present or regenerate if level changed
+      if (!saved.tasks || saved.tasks.length === 0) {
+        saved.tasks = generateTasksForLevel(saved.level);
+      }
       return saved;
     }
     return {
@@ -49,7 +67,8 @@ export const GameProvider = ({ children }) => {
       autoEquip: false,
       disassembleCount: 0,
       disassembleReward: 0,
-      records: []
+      records: [],
+      tasks: generateTasksForLevel(1)
     };
   });
 
@@ -124,13 +143,25 @@ export const GameProvider = ({ children }) => {
 
         showNotification(`✨ 恭喜升级！等级提升至 ${newLevel} 级 - ${cultivation.stage} ${cultivation.rank}`);
 
+        // Check if we need to generate new tasks for the new level
+        const currentConfig = TASK_CONFIG.find(c => prev.level >= c.minLevel && prev.level <= c.maxLevel);
+        const newConfig = TASK_CONFIG.find(c => newLevel >= c.minLevel && newLevel <= c.maxLevel);
+        
+        let newTasks = prev.tasks;
+        // Generate new tasks if moving to a different level range
+        if (currentConfig !== newConfig) {
+          newTasks = generateTasksForLevel(newLevel);
+          showNotification(`📜 新的成长任务已更新！`);
+        }
+
         return {
           ...prev,
           level: newLevel,
           cultivationPoints: prev.cultivationPoints - requiredCultivation,
           maxStamina: newMaxStamina,
           stamina: Math.min(prev.stamina, newMaxStamina),
-          cultivation
+          cultivation,
+          tasks: newTasks
         };
       }
       return prev;
@@ -171,6 +202,9 @@ export const GameProvider = ({ children }) => {
       return newState;
     });
 
+    // Update task progress for chop tasks
+    updateTaskProgress(TASK_TYPES.CHOP, 1);
+
     // Drop equipment using captured values
     const equipment = generateEquipment(currentLevel, currentCombatPower);
     addRecord(RECORD_TYPES.DROP, equipment);
@@ -190,6 +224,9 @@ export const GameProvider = ({ children }) => {
 
       return { ...prev, equipment: newEquipment };
     });
+
+    // Update task progress for equip tasks
+    updateTaskProgress(TASK_TYPES.EQUIP, 1);
 
     setTimeout(() => updateCombatPower(), 100);
   }, [addRecord, updateCombatPower]);
@@ -215,6 +252,11 @@ export const GameProvider = ({ children }) => {
       };
     });
 
+    // Update task progress for disassemble tasks
+    updateTaskProgress(TASK_TYPES.DISASSEMBLE, 1);
+    // Update task progress for spirit stone collection
+    updateTaskProgress(TASK_TYPES.COLLECT_SPIRIT, reward);
+
     setTimeout(() => updateCombatPower(), 100);
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
   }, [gameState.equipment, addRecord, updateCombatPower, showNotification]);
@@ -233,6 +275,11 @@ export const GameProvider = ({ children }) => {
       };
     });
 
+    // Update task progress for disassemble tasks
+    updateTaskProgress(TASK_TYPES.DISASSEMBLE, 1);
+    // Update task progress for spirit stone collection
+    updateTaskProgress(TASK_TYPES.COLLECT_SPIRIT, reward);
+
     return reward;
   }, [addRecord]);
 
@@ -242,6 +289,87 @@ export const GameProvider = ({ children }) => {
     const levelMultiplier = equipment.level || 1;
     return Math.floor(baseReward * qualityMultiplier * levelMultiplier);
   };
+
+  const updateTaskProgress = useCallback((taskType, amount) => {
+    setGameState(prev => {
+      const updatedTasks = prev.tasks.map(task => {
+        if (task.type === taskType && !task.completed) {
+          const newProgress = task.progress + amount;
+          const completed = newProgress >= task.target;
+          
+          if (completed && !task.completed) {
+            // Task just completed
+            setTimeout(() => {
+              showNotification(`✅ 任务完成：${task.name}！可以领取奖励了`);
+            }, 100);
+          }
+          
+          return {
+            ...task,
+            progress: Math.min(newProgress, task.target),
+            completed
+          };
+        }
+        return task;
+      });
+      
+      return { ...prev, tasks: updatedTasks };
+    });
+  }, [showNotification]);
+
+  const updateCombatPowerTask = useCallback(() => {
+    setGameState(prev => {
+      const updatedTasks = prev.tasks.map(task => {
+        if (task.type === TASK_TYPES.COMBAT_POWER && !task.completed) {
+          const completed = prev.combatPower >= task.target;
+          
+          if (completed && !task.completed) {
+            setTimeout(() => {
+              showNotification(`✅ 任务完成：${task.name}！可以领取奖励了`);
+            }, 100);
+          }
+          
+          return {
+            ...task,
+            progress: prev.combatPower,
+            completed
+          };
+        }
+        return task;
+      });
+      
+      return { ...prev, tasks: updatedTasks };
+    });
+  }, [showNotification]);
+
+  // Update combat power tasks when combat power changes
+  useEffect(() => {
+    updateCombatPowerTask();
+  }, [gameState.combatPower, updateCombatPowerTask]);
+
+  const claimTaskReward = useCallback((taskId) => {
+    setGameState(prev => {
+      const task = prev.tasks.find(t => t.id === taskId);
+      if (!task || !task.completed || task.claimed) {
+        return prev;
+      }
+
+      const updatedTasks = prev.tasks.map(t => 
+        t.id === taskId ? { ...t, claimed: true } : t
+      );
+
+      showNotification(`🎉 领取奖励：修为 +${task.reward}`);
+
+      return {
+        ...prev,
+        tasks: updatedTasks,
+        cultivationPoints: prev.cultivationPoints + task.reward
+      };
+    });
+
+    // Check for level up after claiming reward
+    setTimeout(() => checkLevelUp(), 100);
+  }, [showNotification, checkLevelUp]);
 
   const toggleAutoEquip = useCallback(() => {
     setGameState(prev => ({ ...prev, autoEquip: !prev.autoEquip }));
@@ -258,7 +386,8 @@ export const GameProvider = ({ children }) => {
     autoDisassembleNewEquipment,
     toggleAutoEquip,
     updateCombatPower,
-    addRecord
+    addRecord,
+    claimTaskReward
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
