@@ -7,7 +7,7 @@ const LevelDisplay = () => {
   const { gameState } = useGame();
   
   const requiredCultivation = gameState.level * CULTIVATION_POINTS_PER_LEVEL;
-  const progress = gameState.cultivationPoints % requiredCultivation;
+  const progress = (gameState.cultivationPoints || 0) % requiredCultivation;
   
   return (
     <div className="level-display">

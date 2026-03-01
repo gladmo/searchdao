@@ -21,9 +21,7 @@ export const GameProvider = ({ children }) => {
       // Ensure maxStamina is calculated correctly on load
       saved.maxStamina = calculateMaxStamina(saved.level);
       // Initialize cultivationPoints if not present (for backward compatibility)
-      if (saved.cultivationPoints === undefined) {
-        saved.cultivationPoints = 0;
-      }
+      saved.cultivationPoints = saved.cultivationPoints ?? 0;
       return saved;
     }
     return {
