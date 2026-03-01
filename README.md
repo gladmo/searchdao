@@ -105,35 +105,35 @@ http://localhost:8000
 
 ```
 searchdao/
-├── react-app/              # React应用源码
-│   ├── src/
-│   │   ├── components/     # React组件
-│   │   │   ├── TopBar.jsx            # 顶部栏（玩家信息、战力）
-│   │   │   ├── Notification.jsx      # 通知组件
-│   │   │   ├── GameArea.jsx          # 游戏区域（砍树）
-│   │   │   ├── LevelDisplay.jsx      # 等级显示
-│   │   │   ├── StaminaBar.jsx        # 修为条
-│   │   │   ├── StatsDisplay.jsx      # 属性显示
-│   │   │   ├── EquipmentGrid.jsx     # 装备网格
-│   │   │   ├── BottomActions.jsx     # 底部操作
-│   │   │   ├── BottomNav.jsx         # 底部导航
-│   │   │   ├── EquipmentComparisonModal.jsx  # 装备对比弹窗
-│   │   │   ├── EquipmentDetailModal.jsx      # 装备详情弹窗
-│   │   │   └── RecordsModal.jsx      # 记录查询弹窗
-│   │   ├── contexts/       # React Context
-│   │   │   └── GameContext.jsx       # 游戏状态管理
-│   │   ├── utils/          # 工具模块
-│   │   │   ├── constants.js          # 游戏常量
-│   │   │   ├── equipment.js          # 装备生成与管理
-│   │   │   ├── calculations.js       # 战力计算
-│   │   │   └── storage.js            # 本地存储
-│   │   ├── App.jsx         # 主应用组件
-│   │   └── main.jsx        # 应用入口
-│   ├── index.html          # HTML模板
-│   ├── vite.config.js      # Vite配置
-│   └── package.json        # 依赖管理
-├── assets/                 # 构建产物（自动生成）
-├── index.html              # 生产环境HTML（自动生成）
+├── src/                    # React应用源码
+│   ├── components/         # React组件
+│   │   ├── TopBar.jsx            # 顶部栏（玩家信息、战力）
+│   │   ├── Notification.jsx      # 通知组件
+│   │   ├── GameArea.jsx          # 游戏区域（砍树）
+│   │   ├── LevelDisplay.jsx      # 等级显示
+│   │   ├── StaminaBar.jsx        # 修为条
+│   │   ├── StatsDisplay.jsx      # 属性显示
+│   │   ├── EquipmentGrid.jsx     # 装备网格
+│   │   ├── BottomActions.jsx     # 底部操作
+│   │   ├── BottomNav.jsx         # 底部导航
+│   │   ├── EquipmentComparisonModal.jsx  # 装备对比弹窗
+│   │   ├── EquipmentDetailModal.jsx      # 装备详情弹窗
+│   │   └── RecordsModal.jsx      # 记录查询弹窗
+│   ├── contexts/           # React Context
+│   │   └── GameContext.jsx       # 游戏状态管理
+│   ├── utils/              # 工具模块
+│   │   ├── constants.js          # 游戏常量
+│   │   ├── equipment.js          # 装备生成与管理
+│   │   ├── calculations.js       # 战力计算
+│   │   └── storage.js            # 本地存储
+│   ├── App.jsx             # 主应用组件
+│   └── main.jsx            # 应用入口
+├── public/                 # 静态资源
+├── screenshots/            # 游戏截图
+├── index.html              # HTML模板
+├── vite.config.js          # Vite配置
+├── package.json            # 依赖管理
+├── ARCHITECTURE.md         # 架构文档
 └── .github/workflows/      # GitHub Actions配置
     └── deploy.yml          # 自动部署配置
 ```
@@ -152,9 +152,6 @@ searchdao/
 ### 本地开发
 
 ```bash
-# 进入React应用目录
-cd react-app
-
 # 安装依赖
 npm install
 
