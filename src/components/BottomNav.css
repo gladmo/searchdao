@@ -60,6 +60,17 @@
   }
 }
 
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-button.has-notification {
+    animation: none;
+  }
+  
+  .notification-badge {
+    animation: none;
+  }
+}
+
 .notification-badge {
   position: absolute;
   top: -5px;
