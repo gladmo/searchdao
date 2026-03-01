@@ -193,14 +193,13 @@ export function generateSkills(equipmentLevel, quality) {
   // Get level scaling multiplier
   const levelScaling = SKILL_LEVEL_CONFIG.getLevelScaling(equipmentLevel);
   
-  // Calculate total weight
-  const totalWeight = SKILL_POOL.reduce((sum, skill) => sum + skill.weight, 0);
-  
   // Select unique skills
   const selectedSkills = [];
   const availableSkills = [...SKILL_POOL];
   
   for (let i = 0; i < skillCount && availableSkills.length > 0; i++) {
+    // Calculate total weight for remaining skills
+    const totalWeight = availableSkills.reduce((sum, skill) => sum + skill.weight, 0);
     const rand = Math.random() * totalWeight;
     let cumulative = 0;
     let selectedIndex = -1;
