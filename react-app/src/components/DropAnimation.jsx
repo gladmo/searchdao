@@ -27,7 +27,8 @@ const DropAnimation = ({ equipment, onComplete }) => {
       4: { color: '#9c27b0', brightness: '1.0', blur: '25px' },      // 史诗 - purple
       5: { color: '#ff9800', brightness: '1.2', blur: '30px' },      // 传说 - orange
       6: { color: '#f44336', brightness: '1.5', blur: '35px' },      // 神话 - red
-      7: { color: '#ffd700', brightness: '2.0', blur: '40px' }       // 不朽 - gold
+      7: { color: '#ffd700', brightness: '2.0', blur: '40px' },      // 不朽 - gold
+      8: { color: '#ff1493', brightness: '2.5', blur: '45px' }       // 至尊 - deep pink
     };
 
     return qualityColors[quality] || qualityColors[1];

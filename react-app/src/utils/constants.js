@@ -1,5 +1,5 @@
-// Quality tier names - 7 quality levels
-export const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗', '传说', '神话', '不朽'];
+// Quality tier names - 8 quality levels
+export const QUALITY_NAMES = ['', '普通', '精良', '稀有', '史诗', '传说', '神话', '不朽', '至尊'];
 
 // Quality level for Epic and above (affixes start from Epic quality)
 export const EPIC_QUALITY_THRESHOLD = 4;
@@ -122,7 +122,8 @@ export const QUALITY_DROP_CONFIG = [
   { quality: 4, baseRate: 0.05, powerMultiplier: 1.2 },  // 史诗
   { quality: 5, baseRate: 0.00, powerMultiplier: 1.5 },  // 传说
   { quality: 6, baseRate: 0.00, powerMultiplier: 2.0 },  // 神话
-  { quality: 7, baseRate: 0.00, powerMultiplier: 3.0 }   // 不朽
+  { quality: 7, baseRate: 0.00, powerMultiplier: 3.0 },  // 不朽
+  { quality: 8, baseRate: 0.00, powerMultiplier: 4.0 }   // 至尊
 ];
 
 // Quality attribute multipliers - higher quality = stronger base attributes
@@ -135,7 +136,8 @@ export const QUALITY_ATTRIBUTE_MULTIPLIERS = [
   1.20,  // Quality 4 (史诗) - 20% boost
   1.28,  // Quality 5 (传说) - 28% boost
   1.36,  // Quality 6 (神话) - 36% boost
-  1.45   // Quality 7 (不朽) - 45% boost
+  1.45,  // Quality 7 (不朽) - 45% boost
+  1.55   // Quality 8 (至尊) - 55% boost
 ];
 
 // Equipment types

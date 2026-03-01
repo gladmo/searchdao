@@ -60,6 +60,11 @@
   background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
 }
 
+.equipment-slot.quality-8 {
+  border-color: #ff1493;
+  background: linear-gradient(135deg, #ffe4f0 0%, #ffcce5 100%);
+}
+
 .equipment-icon {
   font-size: 32px;
   margin-bottom: 4px;
