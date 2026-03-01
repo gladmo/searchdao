@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadGameState, saveGameState } from '../utils/storage';
 import { calculateMaxStamina, calculateCombatPower, calculateEquipmentPower } from '../utils/calculations';
 import { generateEquipment, generateAffixes, applyAffixesToEquipment } from '../utils/equipment';
-import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS } from '../utils/constants';
+import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL } from '../utils/constants';
 
 const GameContext = createContext();
 
@@ -20,6 +20,8 @@ export const GameProvider = ({ children }) => {
     if (saved) {
       // Ensure maxStamina is calculated correctly on load
       saved.maxStamina = calculateMaxStamina(saved.level);
+      // Initialize cultivationPoints if not present (for backward compatibility)
+      saved.cultivationPoints = saved.cultivationPoints ?? 0;
       return saved;
     }
     return {
@@ -32,6 +34,7 @@ export const GameProvider = ({ children }) => {
       lastStaminaUpdate: Date.now(),
       level: 1,
       chopCount: 0,
+      cultivationPoints: 0,
       cultivation: {
         stage: '炼气前期',
         rank: '一阶'
@@ -113,8 +116,8 @@ export const GameProvider = ({ children }) => {
 
   const checkLevelUp = useCallback(() => {
     setGameState(prev => {
-      const requiredChops = prev.level * 10;
-      if (prev.chopCount >= requiredChops) {
+      const requiredCultivation = prev.level * CULTIVATION_POINTS_PER_LEVEL;
+      if (prev.cultivationPoints >= requiredCultivation) {
         const newLevel = prev.level + 1;
         const newMaxStamina = calculateMaxStamina(newLevel);
         const cultivation = updateCultivationStage(newLevel);
@@ -124,7 +127,7 @@ export const GameProvider = ({ children }) => {
         return {
           ...prev,
           level: newLevel,
-          chopCount: prev.chopCount - requiredChops,
+          cultivationPoints: prev.cultivationPoints - requiredCultivation,
           maxStamina: newMaxStamina,
           stamina: Math.min(prev.stamina, newMaxStamina),
           cultivation
@@ -162,7 +165,8 @@ export const GameProvider = ({ children }) => {
       const newState = {
         ...prev,
         stamina: prev.stamina - 1,
-        chopCount: prev.chopCount + 1
+        chopCount: prev.chopCount + 1,
+        cultivationPoints: prev.cultivationPoints + CULTIVATION_POINTS_PER_CHOP
       };
       return newState;
     });
