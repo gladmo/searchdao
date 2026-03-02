@@ -21,13 +21,36 @@ const TrainingModal = ({ onClose }) => {
     };
   }, []);
 
-  // Calculate player combat stats including mount
+  // Calculate player combat stats including equipment and mount
   const getPlayerStats = () => {
+    let totalAttack = gameState.attack;
+    let totalLife = gameState.life;
+    let totalDefense = gameState.defense;
+    let totalAgility = gameState.agility;
+    
+    // Add equipment bonuses
+    Object.values(gameState.equipment).forEach(equip => {
+      if (equip) {
+        totalAttack += equip.attack;
+        totalLife += equip.life;
+        totalDefense += equip.defense;
+        totalAgility += equip.agility;
+      }
+    });
+    
+    // Add mount bonuses
+    if (mount) {
+      totalAttack += mount.attack;
+      totalLife += mount.life;
+      totalDefense += mount.defense;
+      totalAgility += mount.agility;
+    }
+    
     return {
-      attack: gameState.attack + (mount?.attack || 0),
-      life: gameState.life + (mount?.life || 0),
-      defense: gameState.defense + (mount?.defense || 0),
-      agility: gameState.agility + (mount?.agility || 0)
+      attack: totalAttack,
+      life: totalLife,
+      defense: totalDefense,
+      agility: totalAgility
     };
   };
 

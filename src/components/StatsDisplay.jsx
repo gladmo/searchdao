@@ -5,7 +5,7 @@ import './StatsDisplay.css';
 const StatsDisplay = () => {
   const { gameState } = useGame();
   
-  // Calculate total stats from equipment
+  // Calculate total stats from equipment and mount
   let totalAttack = gameState.attack;
   let totalLife = gameState.life;
   let totalDefense = gameState.defense;
@@ -19,6 +19,14 @@ const StatsDisplay = () => {
       totalAgility += equip.agility;
     }
   });
+  
+  // Add mount bonuses if mount exists
+  if (gameState.mount) {
+    totalAttack += gameState.mount.attack;
+    totalLife += gameState.mount.life;
+    totalDefense += gameState.mount.defense;
+    totalAgility += gameState.mount.agility;
+  }
   
   return (
     <div className="stats-display">
