@@ -13,10 +13,10 @@ const StatsDisplay = () => {
   
   Object.values(gameState.equipment).forEach(equip => {
     if (equip) {
-      totalAttack += equip.attack;
-      totalLife += equip.life;
-      totalDefense += equip.defense;
-      totalAgility += equip.agility;
+      totalAttack += equip.attack || 0;
+      totalLife += equip.life || 0;
+      totalDefense += equip.defense || 0;
+      totalAgility += equip.agility || 0;
     }
   });
   
