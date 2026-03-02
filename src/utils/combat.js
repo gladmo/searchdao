@@ -29,7 +29,7 @@ export const calculateDamage = (attack, defense) => {
 export const calculateCriticalChance = (attackerAgility, defenderAgility) => {
   const agilityDiff = attackerAgility - defenderAgility;
   const baseCritChance = 0.05; // 5% base
-  const bonusCritChance = Math.max(0, agilityDiff * 0.001); // +0.1% per agility point
+  const bonusCritChance = Math.max(0, agilityDiff * 0.001); // +0.001 per agility point (+0.1 percentage points)
   return Math.min(0.5, baseCritChance + bonusCritChance); // Max 50%
 };
 
@@ -42,7 +42,7 @@ export const calculateCriticalChance = (attackerAgility, defenderAgility) => {
 export const calculateDodgeChance = (attackerAgility, defenderAgility) => {
   const agilityDiff = defenderAgility - attackerAgility;
   const baseDodgeChance = 0.03; // 3% base
-  const bonusDodgeChance = Math.max(0, agilityDiff * 0.001); // +0.1% per agility point
+  const bonusDodgeChance = Math.max(0, agilityDiff * 0.001); // +0.001 per agility point (+0.1 percentage points)
   return Math.min(0.4, baseDodgeChance + bonusDodgeChance); // Max 40%
 };
 
