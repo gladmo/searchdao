@@ -488,12 +488,35 @@ export const GameProvider = ({ children }) => {
 
   // Training System Functions
   const startTrainingBattle = useCallback((checkpoint, subLevel) => {
-    // Get current player stats including mount
+    // Get current player stats including equipment and mount
+    let totalAttack = gameState.attack;
+    let totalLife = gameState.life;
+    let totalDefense = gameState.defense;
+    let totalAgility = gameState.agility;
+    
+    // Add equipment bonuses
+    Object.values(gameState.equipment).forEach(equip => {
+      if (equip) {
+        totalAttack += equip.attack || 0;
+        totalLife += equip.life || 0;
+        totalDefense += equip.defense || 0;
+        totalAgility += equip.agility || 0;
+      }
+    });
+    
+    // Add mount bonuses
+    if (gameState.mount) {
+      totalAttack += gameState.mount.attack || 0;
+      totalLife += gameState.mount.life || 0;
+      totalDefense += gameState.mount.defense || 0;
+      totalAgility += gameState.mount.agility || 0;
+    }
+    
     const playerStats = {
-      attack: gameState.attack + (gameState.mount?.attack || 0),
-      life: gameState.life + (gameState.mount?.life || 0),
-      defense: gameState.defense + (gameState.mount?.defense || 0),
-      agility: gameState.agility + (gameState.mount?.agility || 0),
+      attack: totalAttack,
+      life: totalLife,
+      defense: totalDefense,
+      agility: totalAgility,
       skills: gameState.mount?.skills || []
     };
 
@@ -534,7 +557,7 @@ export const GameProvider = ({ children }) => {
     }
 
     return result;
-  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.mount, showNotification]);
+  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.equipment, gameState.mount, showNotification]);
 
   const claimTrainingReward = useCallback((checkpoint) => {
     if (!gameState.training.completedCheckpoints.includes(checkpoint)) {
