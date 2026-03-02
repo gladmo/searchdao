@@ -68,27 +68,68 @@ const MountModal = ({ onClose }) => {
 
         {mount.level < MOUNT_CONFIG.maxLevel && (
           <div className="upgrade-section">
-            <h4>升级预览 (Lv.{mount.level + 1})</h4>
-            <div className="preview-attributes">
-              {(() => {
-                const nextAttrs = MOUNT_CONFIG.getAttributesByLevel(mount.level + 1);
-                return (
-                  <>
-                    <div className="preview-item">
-                      ⚔️ 攻击: {mount.attack} → <span className="increase">{nextAttrs.attack}</span>
-                    </div>
-                    <div className="preview-item">
-                      ❤️ 生命: {mount.life} → <span className="increase">{nextAttrs.life}</span>
-                    </div>
-                    <div className="preview-item">
-                      🛡️ 防御: {mount.defense} → <span className="increase">{nextAttrs.defense}</span>
-                    </div>
-                    <div className="preview-item">
-                      ⚡ 敏捷: {mount.agility} → <span className="increase">{nextAttrs.agility}</span>
-                    </div>
-                  </>
-                );
-              })()}
+            <h4>升级对比 (Lv.{mount.level} → Lv.{mount.level + 1})</h4>
+            <div className="comparison-grid">
+              <div className="comparison-column current-column">
+                <div className="comparison-header">当前等级 ({mount.level}级)</div>
+                <div className="comparison-stat">
+                  <span className="stat-label">⚔️ 攻击:</span>
+                  <span className="stat-value">{mount.attack}</span>
+                </div>
+                <div className="comparison-stat">
+                  <span className="stat-label">❤️ 生命:</span>
+                  <span className="stat-value">{mount.life}</span>
+                </div>
+                <div className="comparison-stat">
+                  <span className="stat-label">🛡️ 防御:</span>
+                  <span className="stat-value">{mount.defense}</span>
+                </div>
+                <div className="comparison-stat">
+                  <span className="stat-label">⚡ 敏捷:</span>
+                  <span className="stat-value">{mount.agility}</span>
+                </div>
+              </div>
+              
+              <div className="comparison-arrow">→</div>
+              
+              <div className="comparison-column next-column">
+                <div className="comparison-header">下一等级 ({mount.level + 1}级)</div>
+                {(() => {
+                  const nextAttrs = MOUNT_CONFIG.getAttributesByLevel(mount.level + 1);
+                  return (
+                    <>
+                      <div className="comparison-stat">
+                        <span className="stat-label">⚔️ 攻击:</span>
+                        <span className="stat-value increase">
+                          {nextAttrs.attack}
+                          <span className="increase-amount">(+{nextAttrs.attack - mount.attack})</span>
+                        </span>
+                      </div>
+                      <div className="comparison-stat">
+                        <span className="stat-label">❤️ 生命:</span>
+                        <span className="stat-value increase">
+                          {nextAttrs.life}
+                          <span className="increase-amount">(+{nextAttrs.life - mount.life})</span>
+                        </span>
+                      </div>
+                      <div className="comparison-stat">
+                        <span className="stat-label">🛡️ 防御:</span>
+                        <span className="stat-value increase">
+                          {nextAttrs.defense}
+                          <span className="increase-amount">(+{nextAttrs.defense - mount.defense})</span>
+                        </span>
+                      </div>
+                      <div className="comparison-stat">
+                        <span className="stat-label">⚡ 敏捷:</span>
+                        <span className="stat-value increase">
+                          {nextAttrs.agility}
+                          <span className="increase-amount">(+{nextAttrs.agility - mount.agility})</span>
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
             <button 
               className="upgrade-button" 

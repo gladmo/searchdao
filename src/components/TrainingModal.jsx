@@ -9,6 +9,7 @@ const TrainingModal = ({ onClose }) => {
   const [battleResult, setBattleResult] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(training.currentCheckpoint);
   const [selectedSubLevel, setSelectedSubLevel] = useState(training.currentSubLevel);
+  const [showCombatLog, setShowCombatLog] = useState(false);
   const timeoutRef = React.useRef(null);
 
   // Cleanup timeout on unmount
@@ -33,6 +34,7 @@ const TrainingModal = ({ onClose }) => {
   const handleBattle = () => {
     const result = startTrainingBattle(selectedCheckpoint, selectedSubLevel);
     setBattleResult(result);
+    setShowCombatLog(true);
 
     // Auto-advance to next level on victory
     if (result.victory) {
@@ -44,7 +46,8 @@ const TrainingModal = ({ onClose }) => {
           setSelectedSubLevel(selectedSubLevel + 1);
         }
         setBattleResult(null);
-      }, 2000);
+        setShowCombatLog(false);
+      }, 3000);
     }
   };
 
@@ -202,20 +205,53 @@ const TrainingModal = ({ onClose }) => {
                         <>
                           <div className="result-icon">🏆</div>
                           <div className="result-text">战斗胜利！</div>
-                          <div className="result-power">
-                            我方战力: {battleResult.playerPower} vs 敌方战力: {battleResult.enemyPower}
+                          <div className="result-details">
+                            <div>回合数: {battleResult.turns}</div>
+                            <div>我方剩余生命: {battleResult.playerFinalLife}/{playerStats.life}</div>
+                            <div>敌方剩余生命: {battleResult.enemyFinalLife}/{enemyStats.life}</div>
                           </div>
+                          {battleResult.combatLog && (
+                            <button 
+                              className="view-log-button"
+                              onClick={() => setShowCombatLog(!showCombatLog)}
+                            >
+                              {showCombatLog ? '隐藏' : '查看'}战斗日志
+                            </button>
+                          )}
                         </>
                       ) : (
                         <>
                           <div className="result-icon">💔</div>
                           <div className="result-text">战斗失败</div>
-                          <div className="result-power">
-                            我方战力: {battleResult.playerPower} vs 敌方战力: {battleResult.enemyPower}
+                          <div className="result-details">
+                            <div>回合数: {battleResult.turns}</div>
+                            <div>我方剩余生命: {battleResult.playerFinalLife}/{playerStats.life}</div>
+                            <div>敌方剩余生命: {battleResult.enemyFinalLife}/{enemyStats.life}</div>
                           </div>
                           <div className="result-hint">提升装备和等级后再试吧！</div>
+                          {battleResult.combatLog && (
+                            <button 
+                              className="view-log-button"
+                              onClick={() => setShowCombatLog(!showCombatLog)}
+                            >
+                              {showCombatLog ? '隐藏' : '查看'}战斗日志
+                            </button>
+                          )}
                         </>
                       )}
+                    </div>
+                  )}
+                  
+                  {showCombatLog && battleResult && battleResult.combatLog && (
+                    <div className="combat-log">
+                      <h4>战斗日志</h4>
+                      <div className="combat-log-content">
+                        {battleResult.combatLog.map((log, index) => (
+                          <div key={index} className="combat-log-line">
+                            {log}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -237,7 +273,9 @@ const TrainingModal = ({ onClose }) => {
             <p>• 第10小关为BOSS，难度更高</p>
             <p>• 完成关卡可领取修为奖励</p>
             <p>• 完成大关卡额外获得筋斗云朵</p>
-            <p>• 战力不足时可先提升装备和等级</p>
+            <p>• 战斗采用回合制，先手由敏捷决定</p>
+            <p>• 伤害计算公式: max(1, 攻击 - 防御)</p>
+            <p>• 暴击率和闪避率受敏捷影响</p>
           </div>
         </div>
       </div>

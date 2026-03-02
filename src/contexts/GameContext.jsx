@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadGameState, saveGameState } from '../utils/storage';
 import { calculateMaxStamina, calculateCombatPower } from '../utils/calculations';
 import { generateEquipment, generateAffixes } from '../utils/equipment';
+import { simulateTurnBasedCombat } from '../utils/combat';
 import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL, TASK_CONFIG, TASK_TYPES, MOUNT_CONFIG, TRAINING_CONFIG } from '../utils/constants';
 
 const GameContext = createContext();
@@ -492,14 +493,15 @@ export const GameProvider = ({ children }) => {
       attack: gameState.attack + (gameState.mount?.attack || 0),
       life: gameState.life + (gameState.mount?.life || 0),
       defense: gameState.defense + (gameState.mount?.defense || 0),
-      agility: gameState.agility + (gameState.mount?.agility || 0)
+      agility: gameState.agility + (gameState.mount?.agility || 0),
+      skills: gameState.mount?.skills || []
     };
 
     // Get enemy stats
     const enemyStats = TRAINING_CONFIG.getEnemyStats(checkpoint, subLevel);
 
-    // Simulate combat
-    const result = TRAINING_CONFIG.simulateCombat(playerStats, enemyStats);
+    // Simulate turn-based combat
+    const result = simulateTurnBasedCombat(playerStats, enemyStats);
 
     if (result.victory) {
       // Update training progress
