@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadGameState, saveGameState } from '../utils/storage';
-import { calculateMaxStamina, calculateCombatPower, calculateEquipmentPower } from '../utils/calculations';
-import { generateEquipment, generateAffixes, applyAffixesToEquipment } from '../utils/equipment';
+import { calculateMaxStamina, calculateCombatPower } from '../utils/calculations';
+import { generateEquipment, generateAffixes } from '../utils/equipment';
 import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL, TASK_CONFIG, TASK_TYPES, MOUNT_CONFIG, TRAINING_CONFIG } from '../utils/constants';
 
 const GameContext = createContext();
@@ -153,6 +153,45 @@ export const GameProvider = ({ children }) => {
     });
   }, []);
 
+  const updateCultivationStage = (level) => {
+    for (const config of LEVEL_CONFIG.stages) {
+      if (level >= config.minLevel && level <= config.maxLevel) {
+        const rankIndex = Math.floor((level - config.minLevel) / 3);
+        const rank = config.ranks[Math.min(rankIndex, config.ranks.length - 1)];
+        return {
+          stage: config.name,
+          rank: rank
+        };
+      }
+    }
+    return { stage: '飞升期', rank: '十阶' };
+  };
+
+  const calculateDisassembleReward = (equipment) => {
+    const baseReward = 10;
+    const qualityMultiplier = equipment.quality || 1;
+    const levelMultiplier = equipment.level || 1;
+    return Math.floor(baseReward * qualityMultiplier * levelMultiplier);
+  };
+
+  const updateTaskProgress = useCallback((taskType, amount) => {
+    setGameState(prev => {
+      const updatedTasks = prev.tasks.map(task => {
+        if (task.type === taskType && !task.completed) {
+          const newProgress = task.progress + amount;
+          return {
+            ...task,
+            progress: newProgress,
+            completed: newProgress >= task.target
+          };
+        }
+        return task;
+      });
+
+      return { ...prev, tasks: updatedTasks };
+    });
+  }, []);
+
   const checkLevelUp = useCallback(() => {
     setGameState(prev => {
       const requiredCultivation = prev.level * CULTIVATION_POINTS_PER_LEVEL;
@@ -187,20 +226,6 @@ export const GameProvider = ({ children }) => {
       return prev;
     });
   }, [showNotification]);
-
-  const updateCultivationStage = (level) => {
-    for (const config of LEVEL_CONFIG.stages) {
-      if (level >= config.minLevel && level <= config.maxLevel) {
-        const rankIndex = Math.floor((level - config.minLevel) / 3);
-        const rank = config.ranks[Math.min(rankIndex, config.ranks.length - 1)];
-        return {
-          stage: config.name,
-          rank: rank
-        };
-      }
-    }
-    return { stage: '飞升期', rank: '十阶' };
-  };
 
   const chopTree = useCallback(() => {
     if (gameState.stamina < 1) {
@@ -247,7 +272,7 @@ export const GameProvider = ({ children }) => {
     setTimeout(() => checkLevelUp(), 100);
 
     return equipment;
-  }, [gameState.stamina, gameState.level, gameState.combatPower, showNotification, addRecord, checkLevelUp]);
+  }, [gameState.stamina, gameState.level, gameState.combatPower, showNotification, addRecord, checkLevelUp, updateTaskProgress]);
 
   const equipNewEquipment = useCallback((equipment) => {
     setGameState(prev => {
@@ -263,7 +288,7 @@ export const GameProvider = ({ children }) => {
     updateTaskProgress(TASK_TYPES.EQUIP, 1);
 
     setTimeout(() => updateCombatPower(), 100);
-  }, [addRecord, updateCombatPower]);
+  }, [addRecord, updateCombatPower, updateTaskProgress]);
 
   const disassembleEquipment = useCallback((equipmentType) => {
     const equipment = gameState.equipment[equipmentType];
@@ -288,12 +313,10 @@ export const GameProvider = ({ children }) => {
 
     // Update task progress for disassemble tasks
     updateTaskProgress(TASK_TYPES.DISASSEMBLE, 1);
-    // Update task progress for spirit stone collection
-    updateTaskProgress(TASK_TYPES.COLLECT_SPIRIT, reward);
 
     setTimeout(() => updateCombatPower(), 100);
     showNotification(`分解 ${equipment.name}，获得 ${reward} 灵石`);
-  }, [gameState.equipment, addRecord, updateCombatPower, showNotification]);
+  }, [gameState.equipment, addRecord, updateCombatPower, showNotification, updateTaskProgress]);
 
   const autoDisassembleNewEquipment = useCallback((equipment) => {
     const reward = calculateDisassembleReward(equipment);
@@ -311,45 +334,9 @@ export const GameProvider = ({ children }) => {
 
     // Update task progress for disassemble tasks
     updateTaskProgress(TASK_TYPES.DISASSEMBLE, 1);
-    // Update task progress for spirit stone collection
-    updateTaskProgress(TASK_TYPES.COLLECT_SPIRIT, reward);
 
     return reward;
-  }, [addRecord]);
-
-  const calculateDisassembleReward = (equipment) => {
-    const baseReward = 10;
-    const qualityMultiplier = equipment.quality || 1;
-    const levelMultiplier = equipment.level || 1;
-    return Math.floor(baseReward * qualityMultiplier * levelMultiplier);
-  };
-
-  const updateTaskProgress = useCallback((taskType, amount) => {
-    setGameState(prev => {
-      const updatedTasks = prev.tasks.map(task => {
-        if (task.type === taskType && !task.completed) {
-          const newProgress = task.progress + amount;
-          const completed = newProgress >= task.target;
-          
-          if (completed && !task.completed) {
-            // Task just completed
-            setTimeout(() => {
-              showNotification(`✅ 任务完成：${task.name}！可以领取奖励了`);
-            }, 100);
-          }
-          
-          return {
-            ...task,
-            progress: Math.min(newProgress, task.target),
-            completed
-          };
-        }
-        return task;
-      });
-      
-      return { ...prev, tasks: updatedTasks };
-    });
-  }, [showNotification]);
+  }, [addRecord, updateTaskProgress]);
 
   const updateCombatPowerTask = useCallback(() => {
     setGameState(prev => {
@@ -473,10 +460,8 @@ export const GameProvider = ({ children }) => {
         affixes = generateAffixes(affixCount);
       }
 
-      // Generate skills if level reaches threshold
-      const skillCount = MOUNT_CONFIG.getSkillsByLevel(newLevel);
-      let skills = prev.mount.skills || [];
-      // Skills will be generated similar to equipment (simplified for now)
+      // Note: Skills functionality can be added in future updates
+      const skills = prev.mount.skills || [];
 
       const mount = {
         ...prev.mount,

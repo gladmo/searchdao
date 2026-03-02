@@ -5,7 +5,7 @@ import './TrainingModal.css';
 
 const TrainingModal = ({ onClose }) => {
   const { gameState, startTrainingBattle, claimTrainingReward } = useGame();
-  const { training, level, mount } = gameState;
+  const { training, mount } = gameState;
   const [battleResult, setBattleResult] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(training.currentCheckpoint);
   const [selectedSubLevel, setSelectedSubLevel] = useState(training.currentSubLevel);
