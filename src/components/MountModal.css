@@ -1,0 +1,189 @@
+.mount-modal {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.cloud-pieces-display {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cloud-icon {
+  font-size: 32px;
+}
+
+.unlock-notice {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.unlock-notice p {
+  margin: 10px 0;
+}
+
+.synthesis-section,
+.mount-stats {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.synthesis-section h3,
+.mount-stats h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.synthesis-preview,
+.upgrade-section {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.synthesis-preview h4,
+.upgrade-section h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #667eea;
+}
+
+.preview-attributes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.preview-item {
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.increase {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.synthesis-button,
+.upgrade-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.synthesis-button:hover,
+.upgrade-button:hover {
+  transform: translateY(-2px);
+}
+
+.synthesis-button:disabled,
+.upgrade-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mount-attributes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.attribute-item {
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.attribute-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.attribute-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.mount-affixes,
+.mount-skills {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 8px;
+}
+
+.mount-affixes h4,
+.mount-skills h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #856404;
+}
+
+.affix-item,
+.skill-item {
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #856404;
+}
+
+.max-level-notice {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
+}
+
+.mount-info {
+  padding: 15px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  color: #1565c0;
+}
+
+.mount-info h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.mount-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}

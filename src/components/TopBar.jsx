@@ -13,7 +13,7 @@ const TopBar = () => {
           <div className="player-name">历飞雨</div>
           <div className="currency">
             <span className="spirit-stone">💎 {gameState.spiritStone}</span>
-            <span className="crystal">🔷 {gameState.crystal}</span>
+            <span className="cloud-pieces">☁️ {gameState.cloudPieces || 0}</span>
           </div>
         </div>
       </div>

@@ -23,6 +23,14 @@ export function calculateCombatPower(gameState) {
     }
   });
   
+  // Add mount bonuses if mount exists
+  if (gameState.mount) {
+    totalAttack += gameState.mount.attack;
+    totalLife += gameState.mount.life;
+    totalDefense += gameState.mount.defense;
+    totalAgility += gameState.mount.agility;
+  }
+  
   return Math.floor(totalAttack + totalLife / LIFE_TO_POWER_RATIO + totalDefense * DEFENSE_MULTIPLIER + totalAgility);
 }
 

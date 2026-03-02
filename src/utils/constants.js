@@ -307,3 +307,101 @@ export const EQUIPMENT_TYPES = [
   { type: 'talisman', name: '符咒', icon: '📜' },
   { type: 'pet', name: '灵兽蛋', icon: '🥚' }
 ];
+
+// Mount System Configuration (坐骑筋斗云)
+export const MOUNT_CONFIG = {
+  unlockLevel: 10, // Unlocks at Foundation Establishment (筑基期)
+  maxLevel: 100,
+  cloudPieceDropRate: 0.005, // 0.5% chance per tree chop
+  
+  // Cloud pieces required for synthesis and upgrades
+  getSynthesisRequirement: () => 100, // Initial synthesis requires 100 pieces
+  getUpgradeRequirement: (currentLevel) => {
+    // Upgrade cost increases with level
+    return Math.floor(50 + currentLevel * 10);
+  },
+  
+  // Attribute gains per level
+  getAttributesByLevel: (level) => {
+    const baseAttack = 20;
+    const baseLife = 200;
+    const baseDefense = 10;
+    const baseAgility = 10;
+    
+    return {
+      attack: Math.floor(baseAttack * (1 + level * 0.15)),
+      life: Math.floor(baseLife * (1 + level * 0.15)),
+      defense: Math.floor(baseDefense * (1 + level * 0.15)),
+      agility: Math.floor(baseAgility * (1 + level * 0.15))
+    };
+  },
+  
+  // Affixes unlocked at certain levels
+  getAffixesByLevel: (level) => {
+    if (level < 20) return 0;
+    if (level < 40) return 1;
+    if (level < 60) return 2;
+    if (level < 80) return 3;
+    return 4;
+  },
+  
+  // Skills unlocked at certain levels
+  getSkillsByLevel: (level) => {
+    if (level < 30) return 0;
+    if (level < 50) return 1;
+    if (level < 70) return 2;
+    if (level < 90) return 3;
+    return 4;
+  }
+};
+
+// Training System Configuration (历练玩法)
+export const TRAINING_CONFIG = {
+  totalMajorCheckpoints: 100,
+  subLevelsPerCheckpoint: 10,
+  bossSubLevel: 10, // Last sub-level is always a BOSS
+  
+  // Rewards
+  getCultivationReward: (checkpoint) => {
+    // Cultivation reward increases with checkpoint
+    return Math.floor(100 + checkpoint * 20);
+  },
+  
+  getCloudPieceReward: (checkpoint) => {
+    // Cloud pieces awarded every major checkpoint completion
+    if (checkpoint % 10 === 0) return Math.floor(10 + checkpoint / 10); // Extra reward every 10 checkpoints
+    return Math.floor(3 + checkpoint / 20);
+  },
+  
+  // Enemy stats scaling
+  getEnemyStats: (checkpoint, subLevel) => {
+    const isBoss = subLevel === 10;
+    const baseMultiplier = 1 + (checkpoint - 1) * 0.2 + (subLevel - 1) * 0.05;
+    const bossMultiplier = isBoss ? 2.0 : 1.0;
+    
+    return {
+      attack: Math.floor(50 * baseMultiplier * bossMultiplier),
+      life: Math.floor(500 * baseMultiplier * bossMultiplier),
+      defense: Math.floor(20 * baseMultiplier * bossMultiplier),
+      agility: Math.floor(15 * baseMultiplier * bossMultiplier),
+      isBoss
+    };
+  },
+  
+  // Calculate combat result
+  simulateCombat: (playerStats, enemyStats) => {
+    // Simple combat simulation
+    const playerPower = playerStats.attack + playerStats.defense * 2 + playerStats.agility + playerStats.life / 10;
+    const enemyPower = enemyStats.attack + enemyStats.defense * 2 + enemyStats.agility + enemyStats.life / 10;
+    
+    // Add some randomness (±10%)
+    const playerRoll = playerPower * (0.9 + Math.random() * 0.2);
+    const enemyRoll = enemyPower * (0.9 + Math.random() * 0.2);
+    
+    return {
+      victory: playerRoll > enemyRoll,
+      playerPower: Math.floor(playerRoll),
+      enemyPower: Math.floor(enemyRoll)
+    };
+  }
+};
