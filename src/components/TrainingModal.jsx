@@ -31,19 +31,19 @@ const TrainingModal = ({ onClose }) => {
     // Add equipment bonuses
     Object.values(gameState.equipment).forEach(equip => {
       if (equip) {
-        totalAttack += equip.attack;
-        totalLife += equip.life;
-        totalDefense += equip.defense;
-        totalAgility += equip.agility;
+        totalAttack += equip.attack || 0;
+        totalLife += equip.life || 0;
+        totalDefense += equip.defense || 0;
+        totalAgility += equip.agility || 0;
       }
     });
     
     // Add mount bonuses
     if (mount) {
-      totalAttack += mount.attack;
-      totalLife += mount.life;
-      totalDefense += mount.defense;
-      totalAgility += mount.agility;
+      totalAttack += mount.attack || 0;
+      totalLife += mount.life || 0;
+      totalDefense += mount.defense || 0;
+      totalAgility += mount.agility || 0;
     }
     
     return {

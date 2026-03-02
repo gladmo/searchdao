@@ -22,10 +22,10 @@ const StatsDisplay = () => {
   
   // Add mount bonuses if mount exists
   if (gameState.mount) {
-    totalAttack += gameState.mount.attack;
-    totalLife += gameState.mount.life;
-    totalDefense += gameState.mount.defense;
-    totalAgility += gameState.mount.agility;
+    totalAttack += gameState.mount.attack || 0;
+    totalLife += gameState.mount.life || 0;
+    totalDefense += gameState.mount.defense || 0;
+    totalAgility += gameState.mount.agility || 0;
   }
   
   return (
