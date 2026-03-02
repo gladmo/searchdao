@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadGameState, saveGameState } from '../utils/storage';
 import { calculateMaxStamina, calculateCombatPower, calculateEquipmentPower } from '../utils/calculations';
 import { generateEquipment, generateAffixes, applyAffixesToEquipment } from '../utils/equipment';
-import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL, TASK_CONFIG, TASK_TYPES } from '../utils/constants';
+import { LEVEL_CONFIG, RECORD_TYPES, MAX_RECORDS, CULTIVATION_POINTS_PER_CHOP, CULTIVATION_POINTS_PER_LEVEL, TASK_CONFIG, TASK_TYPES, MOUNT_CONFIG, TRAINING_CONFIG } from '../utils/constants';
 
 const GameContext = createContext();
 
@@ -40,6 +40,16 @@ export const GameProvider = ({ children }) => {
       if (!saved.tasks || saved.tasks.length === 0) {
         saved.tasks = generateTasksForLevel(saved.level);
       }
+      // Initialize mount system if not present
+      saved.cloudPieces = saved.cloudPieces ?? 0;
+      saved.mount = saved.mount ?? null;
+      // Initialize training system if not present
+      saved.training = saved.training ?? {
+        currentCheckpoint: 1,
+        currentSubLevel: 1,
+        completedCheckpoints: [],
+        claimedRewards: []
+      };
       return saved;
     }
     return {
@@ -68,7 +78,17 @@ export const GameProvider = ({ children }) => {
       disassembleCount: 0,
       disassembleReward: 0,
       records: [],
-      tasks: generateTasksForLevel(1)
+      tasks: generateTasksForLevel(1),
+      // Mount system
+      cloudPieces: 0,
+      mount: null,
+      // Training system
+      training: {
+        currentCheckpoint: 1,
+        currentSubLevel: 1,
+        completedCheckpoints: [],
+        claimedRewards: []
+      }
     };
   });
 
@@ -192,6 +212,9 @@ export const GameProvider = ({ children }) => {
     const currentLevel = gameState.level;
     const currentCombatPower = gameState.combatPower;
 
+    // Check for cloud piece drop (very small chance)
+    const cloudPieceDrop = Math.random() < MOUNT_CONFIG.cloudPieceDropRate;
+
     setGameState(prev => {
       const newState = {
         ...prev,
@@ -199,8 +222,19 @@ export const GameProvider = ({ children }) => {
         chopCount: prev.chopCount + 1,
         cultivationPoints: prev.cultivationPoints + CULTIVATION_POINTS_PER_CHOP
       };
+      
+      // Add cloud piece if dropped
+      if (cloudPieceDrop) {
+        newState.cloudPieces = prev.cloudPieces + 1;
+      }
+      
       return newState;
     });
+
+    // Show notification for cloud piece drop
+    if (cloudPieceDrop) {
+      showNotification('✨ 获得筋斗云朵 x1');
+    }
 
     // Update task progress for chop tasks
     updateTaskProgress(TASK_TYPES.CHOP, 1);
@@ -375,6 +409,177 @@ export const GameProvider = ({ children }) => {
     setGameState(prev => ({ ...prev, autoEquip: !prev.autoEquip }));
   }, []);
 
+  // Mount System Functions
+  const synthesizeMount = useCallback(() => {
+    const requirement = MOUNT_CONFIG.getSynthesisRequirement();
+    if (gameState.cloudPieces < requirement) {
+      showNotification(`需要 ${requirement} 个筋斗云朵才能合成！`);
+      return false;
+    }
+    
+    if (gameState.level < MOUNT_CONFIG.unlockLevel) {
+      showNotification(`需达到筑基期（${MOUNT_CONFIG.unlockLevel}级）才能合成坐骑！`);
+      return false;
+    }
+
+    setGameState(prev => {
+      const attributes = MOUNT_CONFIG.getAttributesByLevel(1);
+      const mount = {
+        level: 1,
+        ...attributes,
+        affixes: [],
+        skills: []
+      };
+
+      showNotification('🎉 成功合成筋斗云坐骑！');
+
+      return {
+        ...prev,
+        cloudPieces: prev.cloudPieces - requirement,
+        mount
+      };
+    });
+
+    setTimeout(() => updateCombatPower(), 100);
+    return true;
+  }, [gameState.cloudPieces, gameState.level, showNotification, updateCombatPower]);
+
+  const upgradeMount = useCallback(() => {
+    if (!gameState.mount) {
+      showNotification('请先合成坐骑！');
+      return false;
+    }
+
+    const currentLevel = gameState.mount.level;
+    if (currentLevel >= MOUNT_CONFIG.maxLevel) {
+      showNotification('坐骑已达到最高等级！');
+      return false;
+    }
+
+    const requirement = MOUNT_CONFIG.getUpgradeRequirement(currentLevel);
+    if (gameState.cloudPieces < requirement) {
+      showNotification(`需要 ${requirement} 个筋斗云朵才能升级！`);
+      return false;
+    }
+
+    setGameState(prev => {
+      const newLevel = prev.mount.level + 1;
+      const attributes = MOUNT_CONFIG.getAttributesByLevel(newLevel);
+      
+      // Generate affixes if level reaches threshold
+      const affixCount = MOUNT_CONFIG.getAffixesByLevel(newLevel);
+      let affixes = prev.mount.affixes || [];
+      if (affixCount > affixes.length) {
+        affixes = generateAffixes(affixCount);
+      }
+
+      // Generate skills if level reaches threshold
+      const skillCount = MOUNT_CONFIG.getSkillsByLevel(newLevel);
+      let skills = prev.mount.skills || [];
+      // Skills will be generated similar to equipment (simplified for now)
+
+      const mount = {
+        ...prev.mount,
+        level: newLevel,
+        ...attributes,
+        affixes,
+        skills
+      };
+
+      showNotification(`✨ 坐骑升级至 ${newLevel} 级！`);
+
+      return {
+        ...prev,
+        cloudPieces: prev.cloudPieces - requirement,
+        mount
+      };
+    });
+
+    setTimeout(() => updateCombatPower(), 100);
+    return true;
+  }, [gameState.cloudPieces, gameState.mount, showNotification, updateCombatPower]);
+
+  // Training System Functions
+  const startTrainingBattle = useCallback((checkpoint, subLevel) => {
+    // Get current player stats including mount
+    const playerStats = {
+      attack: gameState.attack + (gameState.mount?.attack || 0),
+      life: gameState.life + (gameState.mount?.life || 0),
+      defense: gameState.defense + (gameState.mount?.defense || 0),
+      agility: gameState.agility + (gameState.mount?.agility || 0)
+    };
+
+    // Get enemy stats
+    const enemyStats = TRAINING_CONFIG.getEnemyStats(checkpoint, subLevel);
+
+    // Simulate combat
+    const result = TRAINING_CONFIG.simulateCombat(playerStats, enemyStats);
+
+    if (result.victory) {
+      // Update training progress
+      setGameState(prev => {
+        const newTraining = { ...prev.training };
+        
+        // Mark checkpoint as completed if this was the last sub-level
+        if (subLevel === TRAINING_CONFIG.subLevelsPerCheckpoint) {
+          if (!newTraining.completedCheckpoints.includes(checkpoint)) {
+            newTraining.completedCheckpoints.push(checkpoint);
+          }
+          // Move to next checkpoint
+          newTraining.currentCheckpoint = checkpoint + 1;
+          newTraining.currentSubLevel = 1;
+        } else {
+          // Move to next sub-level
+          newTraining.currentSubLevel = subLevel + 1;
+        }
+
+        return {
+          ...prev,
+          training: newTraining
+        };
+      });
+
+      const isBoss = enemyStats.isBoss;
+      showNotification(isBoss ? '🏆 击败BOSS！' : '✓ 战斗胜利！');
+    } else {
+      showNotification('✗ 战斗失败！请提升实力后再试。');
+    }
+
+    return result;
+  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.mount, showNotification]);
+
+  const claimTrainingReward = useCallback((checkpoint) => {
+    if (!gameState.training.completedCheckpoints.includes(checkpoint)) {
+      showNotification('请先完成该关卡！');
+      return false;
+    }
+
+    if (gameState.training.claimedRewards.includes(checkpoint)) {
+      showNotification('已经领取过该关卡奖励！');
+      return false;
+    }
+
+    const cultivationReward = TRAINING_CONFIG.getCultivationReward(checkpoint);
+    const cloudPieceReward = TRAINING_CONFIG.getCloudPieceReward(checkpoint);
+
+    setGameState(prev => {
+      const newTraining = { ...prev.training };
+      newTraining.claimedRewards.push(checkpoint);
+
+      showNotification(`🎉 获得修为 +${cultivationReward}，筋斗云朵 +${cloudPieceReward}`);
+
+      return {
+        ...prev,
+        training: newTraining,
+        cultivationPoints: prev.cultivationPoints + cultivationReward,
+        cloudPieces: prev.cloudPieces + cloudPieceReward
+      };
+    });
+
+    setTimeout(() => checkLevelUp(), 100);
+    return true;
+  }, [gameState.training, showNotification, checkLevelUp]);
+
   const value = {
     gameState,
     setGameState,
@@ -387,7 +592,13 @@ export const GameProvider = ({ children }) => {
     toggleAutoEquip,
     updateCombatPower,
     addRecord,
-    claimTaskReward
+    claimTaskReward,
+    // Mount system
+    synthesizeMount,
+    upgradeMount,
+    // Training system
+    startTrainingBattle,
+    claimTrainingReward
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
