@@ -9,6 +9,16 @@ const TrainingModal = ({ onClose }) => {
   const [battleResult, setBattleResult] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(training.currentCheckpoint);
   const [selectedSubLevel, setSelectedSubLevel] = useState(training.currentSubLevel);
+  const timeoutRef = React.useRef(null);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate player combat stats including mount
   const getPlayerStats = () => {
@@ -26,7 +36,7 @@ const TrainingModal = ({ onClose }) => {
 
     // Auto-advance to next level on victory
     if (result.victory) {
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (selectedSubLevel === TRAINING_CONFIG.subLevelsPerCheckpoint) {
           setSelectedCheckpoint(selectedCheckpoint + 1);
           setSelectedSubLevel(1);

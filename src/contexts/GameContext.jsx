@@ -460,8 +460,9 @@ export const GameProvider = ({ children }) => {
         affixes = generateAffixes(affixCount);
       }
 
-      // Note: Skills functionality can be added in future updates
-      const skills = prev.mount.skills || [];
+      // Note: Skills functionality will be implemented in a future update
+      // For now, we keep the skills array empty
+      const skills = [];
 
       const mount = {
         ...prev.mount,

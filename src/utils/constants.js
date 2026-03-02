@@ -338,7 +338,7 @@ export const MOUNT_CONFIG = {
   
   // Affixes unlocked at certain levels
   getAffixesByLevel: (level) => {
-    if (level < 20) return [];
+    if (level < 20) return 0;
     if (level < 40) return 1;
     if (level < 60) return 2;
     if (level < 80) return 3;
