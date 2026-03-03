@@ -145,22 +145,22 @@ export const AFFIX_POOL = [
   { name: '锋利', type: 'attack', min: 10, max: 30, weight: 8 },
   { name: '破甲', type: 'attack', min: 8, max: 25, weight: 9 },
   { name: '暴击', type: 'attack', min: 3, max: 15, weight: 7 },
-  
+
   // Life related
   { name: '生机', type: 'life', min: 50, max: 200, weight: 10 },
   { name: '回春', type: 'life', min: 80, max: 250, weight: 8 },
   { name: '护体', type: 'life', min: 60, max: 180, weight: 9 },
-  
+
   // Defense related
   { name: '坚固', type: 'defense', min: 3, max: 15, weight: 10 },
   { name: '守护', type: 'defense', min: 5, max: 20, weight: 8 },
   { name: '铁壁', type: 'defense', min: 4, max: 18, weight: 9 },
-  
+
   // Agility related
   { name: '迅捷', type: 'agility', min: 4, max: 18, weight: 10 },
   { name: '轻灵', type: 'agility', min: 6, max: 22, weight: 8 },
   { name: '闪避', type: 'agility', min: 5, max: 20, weight: 9 },
-  
+
   // Special affixes
   { name: '五行', type: 'multi', min: 3, max: 12, weight: 5 },
   { name: '灵力', type: 'multi', min: 5, max: 15, weight: 6 },
@@ -261,7 +261,7 @@ export const SKILL_POOL = [
   { name: '闪避', type: 'dodge', category: 'trigger', min: 1, max: 16, weight: 9, powerMultiplier: 2.6 },
   { name: '反击', type: 'counter', category: 'trigger', min: 1, max: 14, weight: 8, powerMultiplier: 2.7 },
   { name: '吸血', type: 'lifesteal', category: 'trigger', min: 2, max: 20, weight: 9, powerMultiplier: 2.4 },
-  
+
   // Resistance skills (percentage-based resistance)
   { name: '击晕抗性', type: 'stun_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
   { name: '暴击抗性', type: 'critical_resist', category: 'resistance', min: 3, max: 25, weight: 7, powerMultiplier: 2.2 },
@@ -276,7 +276,7 @@ export const SKILL_LEVEL_CONFIG = {
   getSkillCount: (level, quality) => {
     // Only Epic (4) and above can have skills
     if (quality < EPIC_QUALITY_THRESHOLD) return 0;
-    
+
     // Skill count increases with level
     if (level < 30) return 0;
     if (level < 50) return 1;
@@ -284,7 +284,7 @@ export const SKILL_LEVEL_CONFIG = {
     if (level < 90) return 3;
     return 4; // Max 4 skills for level 90+
   },
-  
+
   // Skill value scales with level - higher levels get better values
   getLevelScaling: (level) => {
     // Returns a multiplier from 1.0 (level 1) to 2.0 (level 100)
@@ -312,15 +312,15 @@ export const EQUIPMENT_TYPES = [
 export const MOUNT_CONFIG = {
   unlockLevel: 10, // Unlocks at Foundation Establishment (筑基期)
   maxLevel: 100,
-  cloudPieceDropRate: 0.005, // 0.5% chance per tree chop
-  
+  cloudPieceDropRate: 0.15, // 15% chance per tree chop
+
   // Cloud pieces required for synthesis and upgrades
   getSynthesisRequirement: () => 100, // Initial synthesis requires 100 pieces
   getUpgradeRequirement: (currentLevel) => {
     // Upgrade cost increases with level
     return Math.floor(50 + currentLevel * 10);
   },
-  
+
   // Attribute gains per level
   // Mount stats are approximately 10x stronger than equivalent level equipment
   // This drives gameplay towards upgrading mounts
@@ -329,7 +329,7 @@ export const MOUNT_CONFIG = {
     const baseLife = 1000;    // 10x equipment avg (100)
     const baseDefense = 125;  // 10x equipment avg (12.5)
     const baseAgility = 90;   // 10x equipment avg (9)
-    
+
     // Growth formula matches equipment: 1 + (level - 1) * 0.1
     // Level 1: 1.0x (base stats), Level 10: 1.9x, Level 100: 10.9x
     // This maintains a consistent 10x ratio vs equipment at all levels
@@ -340,7 +340,7 @@ export const MOUNT_CONFIG = {
       agility: Math.floor(baseAgility * (1 + (level - 1) * 0.1))
     };
   },
-  
+
   // Affixes unlocked at certain levels
   getAffixesByLevel: (level) => {
     if (level < 20) return 0;
@@ -349,7 +349,7 @@ export const MOUNT_CONFIG = {
     if (level < 80) return 3;
     return 4;
   },
-  
+
   // Skills unlocked at certain levels
   getSkillsByLevel: (level) => {
     if (level < 30) return 0;
@@ -365,37 +365,37 @@ export const TRAINING_CONFIG = {
   totalMajorCheckpoints: 100,
   subLevelsPerCheckpoint: 10,
   bossSubLevel: 10, // Last sub-level is always a BOSS
-  
+
   // Rewards - increased values (3x previous)
   getCultivationReward: (checkpoint) => {
     // Cultivation reward increases with checkpoint
     return Math.floor(300 + checkpoint * 60);
   },
-  
+
   getCloudPieceReward: (checkpoint) => {
     // Cloud pieces awarded every major checkpoint completion
     if (checkpoint % 10 === 0) return Math.floor(30 + checkpoint * 0.3); // Extra reward every 10 checkpoints
     return Math.floor(9 + checkpoint * 0.15);
   },
-  
+
   // Enemy stats scaling - optimized to ensure next checkpoint first stage > previous boss
   getEnemyStats: (checkpoint, subLevel) => {
     const isBoss = subLevel === 10;
-    
+
     const baseAttack = 50;
     const baseLife = 500;
     const baseDefense = 20;
     const baseAgility = 15;
-    
+
     // Each checkpoint increases base by 120 (ensures next checkpoint > previous boss)
     const checkpointBase = checkpoint * 120;
-    
+
     // Sublevel progression: 0 to 81 (9 levels * 9)
     const subLevelBonus = (subLevel - 1) * 9;
-    
+
     // Boss gets small bonus
     const bossBonus = isBoss ? 10 : 0;
-    
+
     return {
       attack: baseAttack + checkpointBase + subLevelBonus + bossBonus,
       life: baseLife + checkpointBase * 10 + subLevelBonus * 10 + bossBonus * 10,
@@ -404,29 +404,29 @@ export const TRAINING_CONFIG = {
       isBoss
     };
   },
-  
+
   // Check if player can sweep a checkpoint (player stats significantly greater than boss)
   canSweepCheckpoint: (playerStats, checkpoint) => {
     const bossStats = TRAINING_CONFIG.getEnemyStats(checkpoint, TRAINING_CONFIG.bossSubLevel);
-    
+
     // Player power calculation
     const playerPower = playerStats.attack + playerStats.defense * 2 + playerStats.agility + playerStats.life / 10;
     const bossPower = bossStats.attack + bossStats.defense * 2 + bossStats.agility + bossStats.life / 10;
-    
+
     // Can sweep if player power is at least 2x boss power (significant advantage)
     return playerPower >= bossPower * 2;
   },
-  
+
   // Calculate combat result
   simulateCombat: (playerStats, enemyStats) => {
     // Simple combat simulation
     const playerPower = playerStats.attack + playerStats.defense * 2 + playerStats.agility + playerStats.life / 10;
     const enemyPower = enemyStats.attack + enemyStats.defense * 2 + enemyStats.agility + enemyStats.life / 10;
-    
+
     // Add some randomness (±10%)
     const playerRoll = playerPower * (0.9 + Math.random() * 0.2);
     const enemyRoll = enemyPower * (0.9 + Math.random() * 0.2);
-    
+
     return {
       victory: playerRoll > enemyRoll,
       playerPower: Math.floor(playerRoll),
