@@ -95,8 +95,8 @@ const TrainingModal = ({ onClose }) => {
     const checkpoints = [];
     const maxVisible = Math.min(training.currentCheckpoint + 5, TRAINING_CONFIG.totalMajorCheckpoints);
     
-    // Get claimed checkpoints sorted
-    const claimedCheckpoints = training.claimedRewards.sort((a, b) => a - b);
+    // Get claimed checkpoints sorted (create copy to avoid mutation)
+    const claimedCheckpoints = [...training.claimedRewards].sort((a, b) => a - b);
     const lastClaimedCheckpoint = claimedCheckpoints.length > 0 ? claimedCheckpoints[claimedCheckpoints.length - 1] : 0;
     
     // Determine which checkpoints to show
@@ -115,8 +115,8 @@ const TrainingModal = ({ onClose }) => {
       }
     }
 
-    // Add collapsed indicator if there are hidden claimed checkpoints
-    const hiddenClaimedCount = claimedCheckpoints.filter(cp => cp < lastClaimedCheckpoint).length;
+    // Calculate hidden claimed count (all claimed checkpoints except the last one)
+    const hiddenClaimedCount = claimedCheckpoints.length > 0 ? claimedCheckpoints.length - 1 : 0;
     
     if (hiddenClaimedCount > 0 && !showClaimedCheckpoints) {
       checkpoints.push(
