@@ -634,7 +634,7 @@ export const GameProvider = ({ children }) => {
     setGameState(prev => {
       const newTraining = { ...prev.training };
       
-      // Mark checkpoint as completed
+      // Mark checkpoint as completed (rewards must be claimed separately)
       if (!newTraining.completedCheckpoints.includes(checkpoint)) {
         newTraining.completedCheckpoints.push(checkpoint);
       }
@@ -649,9 +649,9 @@ export const GameProvider = ({ children }) => {
       };
     });
 
-    showNotification(`⚡ 扫荡成功！快速完成第 ${checkpoint} 关所有小关卡！`);
+    showNotification(`⚡ 扫荡成功！快速完成第 ${checkpoint} 关所有小关卡！请领取奖励。`);
     return true;
-  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.equipment, gameState.mount, showNotification]);
+  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.equipment, gameState.mount, showNotification, setGameState]);
 
   const value = {
     gameState,

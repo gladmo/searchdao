@@ -369,8 +369,8 @@ export const TRAINING_CONFIG = {
   
   getCloudPieceReward: (checkpoint) => {
     // Cloud pieces awarded every major checkpoint completion
-    if (checkpoint % 10 === 0) return Math.floor(30 + checkpoint / 10 * 3); // Extra reward every 10 checkpoints
-    return Math.floor(9 + checkpoint / 20 * 3);
+    if (checkpoint % 10 === 0) return Math.floor(30 + checkpoint * 0.3); // Extra reward every 10 checkpoints
+    return Math.floor(9 + checkpoint * 0.15);
   },
   
   // Enemy stats scaling - optimized to ensure next checkpoint first stage > previous boss

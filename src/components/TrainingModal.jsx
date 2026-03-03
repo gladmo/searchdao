@@ -77,11 +77,12 @@ const TrainingModal = ({ onClose }) => {
   const handleSweep = () => {
     const success = sweepTrainingCheckpoint(selectedCheckpoint);
     if (success) {
-      // Auto-advance to next checkpoint
+      // Auto-advance to next checkpoint after brief delay for UX
+      const UI_TRANSITION_DELAY = 1000; // ms - allows user to see completion notification
       setTimeout(() => {
         setSelectedCheckpoint(selectedCheckpoint + 1);
         setSelectedSubLevel(1);
-      }, 1000);
+      }, UI_TRANSITION_DELAY);
     }
   };
 
