@@ -4,7 +4,7 @@ import { TRAINING_CONFIG } from '../utils/constants';
 import './TrainingModal.css';
 
 const TrainingModal = ({ onClose }) => {
-  const { gameState, startTrainingBattle, claimTrainingReward } = useGame();
+  const { gameState, startTrainingBattle, claimTrainingReward, sweepTrainingCheckpoint } = useGame();
   const { training, mount } = gameState;
   const [battleResult, setBattleResult] = useState(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(training.currentCheckpoint);
@@ -71,6 +71,17 @@ const TrainingModal = ({ onClose }) => {
         setBattleResult(null);
         setShowCombatLog(false);
       }, 3000);
+    }
+  };
+
+  const handleSweep = () => {
+    const success = sweepTrainingCheckpoint(selectedCheckpoint);
+    if (success) {
+      // Auto-advance to next checkpoint
+      setTimeout(() => {
+        setSelectedCheckpoint(selectedCheckpoint + 1);
+        setSelectedSubLevel(1);
+      }, 1000);
     }
   };
 
@@ -166,6 +177,7 @@ const TrainingModal = ({ onClose }) => {
   const playerStats = getPlayerStats();
   const enemyStats = TRAINING_CONFIG.getEnemyStats(selectedCheckpoint, selectedSubLevel);
   const canBattle = selectedCheckpoint === training.currentCheckpoint && selectedSubLevel === training.currentSubLevel;
+  const canSweep = selectedCheckpoint === training.currentCheckpoint && TRAINING_CONFIG.canSweepCheckpoint(playerStats, selectedCheckpoint);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -278,13 +290,25 @@ const TrainingModal = ({ onClose }) => {
                     </div>
                   )}
 
-                  <button 
-                    className="battle-button"
-                    onClick={handleBattle}
-                    disabled={!canBattle || battleResult !== null}
-                  >
-                    {canBattle ? '开始战斗' : '已完成'}
-                  </button>
+                  <div className="battle-actions">
+                    <button 
+                      className="battle-button"
+                      onClick={handleBattle}
+                      disabled={!canBattle || battleResult !== null}
+                    >
+                      {canBattle ? '开始战斗' : '已完成'}
+                    </button>
+                    {canSweep && (
+                      <button 
+                        className="sweep-button"
+                        onClick={handleSweep}
+                        disabled={battleResult !== null}
+                        title="实力远超此关BOSS，可直接扫荡"
+                      >
+                        ⚡ 扫荡此关
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -294,11 +318,11 @@ const TrainingModal = ({ onClose }) => {
             <h4>💡 玩法说明</h4>
             <p>• 共100个大关卡，每个关卡有10个小关卡</p>
             <p>• 第10小关为BOSS，难度更高</p>
-            <p>• 完成关卡可领取修为奖励</p>
-            <p>• 完成大关卡额外获得筋斗云朵</p>
+            <p>• 完成关卡可领取修为和筋斗云朵奖励</p>
             <p>• 战斗采用回合制，先手由敏捷决定</p>
             <p>• 伤害计算公式: max(1, 攻击 - 防御)</p>
             <p>• 暴击率和闪避率受敏捷影响</p>
+            <p>• ⚡ 当实力远超此关BOSS时，可使用扫荡功能快速完成</p>
           </div>
         </div>
       </div>

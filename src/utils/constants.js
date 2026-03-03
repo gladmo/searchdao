@@ -361,31 +361,55 @@ export const TRAINING_CONFIG = {
   subLevelsPerCheckpoint: 10,
   bossSubLevel: 10, // Last sub-level is always a BOSS
   
-  // Rewards
+  // Rewards - increased values (3x previous)
   getCultivationReward: (checkpoint) => {
     // Cultivation reward increases with checkpoint
-    return Math.floor(100 + checkpoint * 20);
+    return Math.floor(300 + checkpoint * 60);
   },
   
   getCloudPieceReward: (checkpoint) => {
     // Cloud pieces awarded every major checkpoint completion
-    if (checkpoint % 10 === 0) return Math.floor(10 + checkpoint / 10); // Extra reward every 10 checkpoints
-    return Math.floor(3 + checkpoint / 20);
+    if (checkpoint % 10 === 0) return Math.floor(30 + checkpoint / 10 * 3); // Extra reward every 10 checkpoints
+    return Math.floor(9 + checkpoint / 20 * 3);
   },
   
-  // Enemy stats scaling
+  // Enemy stats scaling - optimized to ensure next checkpoint first stage > previous boss
   getEnemyStats: (checkpoint, subLevel) => {
     const isBoss = subLevel === 10;
-    const baseMultiplier = 1 + (checkpoint - 1) * 0.2 + (subLevel - 1) * 0.05;
-    const bossMultiplier = isBoss ? 2.0 : 1.0;
+    
+    const baseAttack = 50;
+    const baseLife = 500;
+    const baseDefense = 20;
+    const baseAgility = 15;
+    
+    // Each checkpoint increases base by 120 (ensures next checkpoint > previous boss)
+    const checkpointBase = checkpoint * 120;
+    
+    // Sublevel progression: 0 to 81 (9 levels * 9)
+    const subLevelBonus = (subLevel - 1) * 9;
+    
+    // Boss gets small bonus
+    const bossBonus = isBoss ? 10 : 0;
     
     return {
-      attack: Math.floor(50 * baseMultiplier * bossMultiplier),
-      life: Math.floor(500 * baseMultiplier * bossMultiplier),
-      defense: Math.floor(20 * baseMultiplier * bossMultiplier),
-      agility: Math.floor(15 * baseMultiplier * bossMultiplier),
+      attack: baseAttack + checkpointBase + subLevelBonus + bossBonus,
+      life: baseLife + checkpointBase * 10 + subLevelBonus * 10 + bossBonus * 10,
+      defense: baseDefense + Math.floor(checkpointBase * 0.4) + Math.floor(subLevelBonus * 0.4) + Math.floor(bossBonus * 0.4),
+      agility: baseAgility + Math.floor(checkpointBase * 0.3) + Math.floor(subLevelBonus * 0.3) + Math.floor(bossBonus * 0.3),
       isBoss
     };
+  },
+  
+  // Check if player can sweep a checkpoint (player stats significantly greater than boss)
+  canSweepCheckpoint: (playerStats, checkpoint) => {
+    const bossStats = TRAINING_CONFIG.getEnemyStats(checkpoint, TRAINING_CONFIG.bossSubLevel);
+    
+    // Player power calculation
+    const playerPower = playerStats.attack + playerStats.defense * 2 + playerStats.agility + playerStats.life / 10;
+    const bossPower = bossStats.attack + bossStats.defense * 2 + bossStats.agility + bossStats.life / 10;
+    
+    // Can sweep if player power is at least 2x boss power (significant advantage)
+    return playerPower >= bossPower * 2;
   },
   
   // Calculate combat result
