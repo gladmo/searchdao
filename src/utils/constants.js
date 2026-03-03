@@ -413,8 +413,8 @@ export const TRAINING_CONFIG = {
     const playerPower = playerStats.attack + playerStats.defense * 2 + playerStats.agility + playerStats.life / 10;
     const bossPower = bossStats.attack + bossStats.defense * 2 + bossStats.agility + bossStats.life / 10;
 
-    // Can sweep if player power is at least 2x boss power (significant advantage)
-    return playerPower >= bossPower * 2;
+    // Can sweep if player power is at least 1.2x boss power (significant advantage)
+    return playerPower >= bossPower * 1.2;
   },
 
   // Calculate combat result
