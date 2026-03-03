@@ -10,6 +10,7 @@ const TrainingModal = ({ onClose }) => {
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(training.currentCheckpoint);
   const [selectedSubLevel, setSelectedSubLevel] = useState(training.currentSubLevel);
   const [showCombatLog, setShowCombatLog] = useState(false);
+  const [showClaimedCheckpoints, setShowClaimedCheckpoints] = useState(false);
   const timeoutRef = React.useRef(null);
 
   // Cleanup timeout on unmount
@@ -93,8 +94,47 @@ const TrainingModal = ({ onClose }) => {
   const renderCheckpointList = () => {
     const checkpoints = [];
     const maxVisible = Math.min(training.currentCheckpoint + 5, TRAINING_CONFIG.totalMajorCheckpoints);
-
+    
+    // Get claimed checkpoints sorted (create copy to avoid mutation)
+    const claimedCheckpoints = [...training.claimedRewards].sort((a, b) => a - b);
+    const lastClaimedCheckpoint = claimedCheckpoints.length > 0 ? claimedCheckpoints[claimedCheckpoints.length - 1] : 0;
+    
+    // Determine which checkpoints to show
+    const checkpointsToShow = [];
+    
     for (let i = 1; i <= maxVisible; i++) {
+      const isRewardClaimed = training.claimedRewards.includes(i);
+      
+      // Show all unclaimed/incomplete checkpoints
+      if (!isRewardClaimed) {
+        checkpointsToShow.push(i);
+      }
+      // For claimed checkpoints, only show the last one (unless expanded)
+      else if (showClaimedCheckpoints || i === lastClaimedCheckpoint) {
+        checkpointsToShow.push(i);
+      }
+    }
+
+    // Calculate hidden claimed count (all claimed checkpoints except the last one)
+    const hiddenClaimedCount = claimedCheckpoints.length > 0 ? claimedCheckpoints.length - 1 : 0;
+    
+    if (hiddenClaimedCount > 0 && !showClaimedCheckpoints) {
+      checkpoints.push(
+        <div 
+          key="collapsed-indicator"
+          className="collapsed-checkpoints-indicator"
+          onClick={() => setShowClaimedCheckpoints(true)}
+        >
+          <div className="collapsed-icon">📦</div>
+          <div className="collapsed-text">
+            {hiddenClaimedCount} 个已领取关卡
+          </div>
+          <div className="collapsed-expand">展开 ▼</div>
+        </div>
+      );
+    }
+
+    checkpointsToShow.forEach(i => {
       const isCompleted = training.completedCheckpoints.includes(i);
       const isCurrent = i === training.currentCheckpoint;
       const isLocked = i > training.currentCheckpoint;
@@ -103,7 +143,7 @@ const TrainingModal = ({ onClose }) => {
       checkpoints.push(
         <div 
           key={i} 
-          className={`checkpoint-item ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`}
+          className={`checkpoint-item ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''} ${isRewardClaimed ? 'claimed' : ''}`}
           onClick={() => !isLocked && setSelectedCheckpoint(i)}
         >
           <div className="checkpoint-number">
@@ -131,6 +171,23 @@ const TrainingModal = ({ onClose }) => {
           {isCompleted && isRewardClaimed && (
             <span className="claimed-badge">已领取</span>
           )}
+        </div>
+      );
+    });
+    
+    // Add collapse button if showing claimed checkpoints
+    if (showClaimedCheckpoints && hiddenClaimedCount > 0) {
+      checkpoints.push(
+        <div 
+          key="collapse-button"
+          className="collapsed-checkpoints-indicator"
+          onClick={() => setShowClaimedCheckpoints(false)}
+        >
+          <div className="collapsed-icon">📦</div>
+          <div className="collapsed-text">
+            折叠已领取关卡
+          </div>
+          <div className="collapsed-expand">收起 ▲</div>
         </div>
       );
     }
