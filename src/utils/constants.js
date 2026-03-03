@@ -330,7 +330,9 @@ export const MOUNT_CONFIG = {
     const baseDefense = 125;  // 10x equipment avg (12.5)
     const baseAgility = 90;   // 10x equipment avg (9)
     
-    // Growth rate matches equipment (0.1 per level) to maintain 10x ratio
+    // Growth formula matches equipment: 1 + (level - 1) * 0.1
+    // Level 1: 1.0x (base stats), Level 10: 1.9x, Level 100: 10.9x
+    // This maintains a consistent 10x ratio vs equipment at all levels
     return {
       attack: Math.floor(baseAttack * (1 + (level - 1) * 0.1)),
       life: Math.floor(baseLife * (1 + (level - 1) * 0.1)),
