@@ -265,3 +265,122 @@
   margin: 5px 0;
   font-size: 14px;
 }
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+  .mount-modal {
+    width: 95%;
+    max-width: 95%;
+    max-height: 95vh;
+  }
+
+  .cloud-pieces-display {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .cloud-icon {
+    font-size: 28px;
+  }
+
+  .synthesis-section,
+  .mount-stats {
+    padding: 15px;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .comparison-arrow {
+    transform: rotate(90deg);
+    font-size: 20px;
+    margin: 5px 0;
+  }
+
+  .comparison-column {
+    padding: 10px;
+  }
+
+  .comparison-header {
+    font-size: 13px;
+  }
+
+  .comparison-stat {
+    padding: 5px 6px;
+  }
+
+  .comparison-stat .stat-label {
+    font-size: 12px;
+  }
+
+  .comparison-stat .stat-value {
+    font-size: 14px;
+  }
+
+  .increase-amount {
+    font-size: 10px;
+  }
+
+  .mount-attributes,
+  .preview-attributes {
+    grid-template-columns: 1fr;
+  }
+
+  .attribute-item {
+    padding: 8px;
+  }
+
+  .attribute-label {
+    font-size: 13px;
+  }
+
+  .attribute-value {
+    font-size: 16px;
+  }
+
+  .preview-item {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .synthesis-button,
+  .upgrade-button {
+    padding: 10px;
+    font-size: 15px;
+  }
+
+  .mount-affixes,
+  .mount-skills {
+    padding: 12px;
+  }
+
+  .affix-item,
+  .skill-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+
+  .mount-info {
+    padding: 12px;
+  }
+
+  .mount-info p {
+    font-size: 13px;
+  }
+
+  .max-level-notice {
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .unlock-notice {
+    padding: 30px 15px;
+  }
+
+  .synthesis-preview,
+  .upgrade-section {
+    padding: 12px;
+  }
+}
