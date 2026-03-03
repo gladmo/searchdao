@@ -322,17 +322,20 @@ export const MOUNT_CONFIG = {
   },
   
   // Attribute gains per level
+  // Mount stats are approximately 10x stronger than equivalent level equipment
+  // This drives gameplay towards upgrading mounts
   getAttributesByLevel: (level) => {
-    const baseAttack = 20;
-    const baseLife = 200;
-    const baseDefense = 10;
-    const baseAgility = 10;
+    const baseAttack = 200;   // 10x equipment avg (20)
+    const baseLife = 1000;    // 10x equipment avg (100)
+    const baseDefense = 125;  // 10x equipment avg (12.5)
+    const baseAgility = 90;   // 10x equipment avg (9)
     
+    // Growth rate matches equipment (0.1 per level) to maintain 10x ratio
     return {
-      attack: Math.floor(baseAttack * (1 + level * 0.15)),
-      life: Math.floor(baseLife * (1 + level * 0.15)),
-      defense: Math.floor(baseDefense * (1 + level * 0.15)),
-      agility: Math.floor(baseAgility * (1 + level * 0.15))
+      attack: Math.floor(baseAttack * (1 + (level - 1) * 0.1)),
+      life: Math.floor(baseLife * (1 + (level - 1) * 0.1)),
+      defense: Math.floor(baseDefense * (1 + (level - 1) * 0.1)),
+      agility: Math.floor(baseAgility * (1 + (level - 1) * 0.1))
     };
   },
   
