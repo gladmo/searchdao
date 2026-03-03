@@ -123,6 +123,8 @@
   font-size: 12px;
   cursor: pointer;
   transition: transform 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .claim-button-small:hover {
@@ -135,6 +137,8 @@
   color: #666;
   border-radius: 4px;
   font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .locked-notice {
