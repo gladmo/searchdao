@@ -394,8 +394,14 @@
   opacity: 0.9;
 }
 
+.battle-actions {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
 .battle-button {
-  width: 100%;
+  flex: 1;
   padding: 15px;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
@@ -415,6 +421,41 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.sweep-button {
+  flex: 1;
+  padding: 15px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.sweep-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.sweep-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .battle-actions {
+    flex-direction: column;
+  }
 }
 
 .training-info {

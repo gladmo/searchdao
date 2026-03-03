@@ -591,6 +591,68 @@ export const GameProvider = ({ children }) => {
     return true;
   }, [gameState.training, showNotification, checkLevelUp]);
 
+  // Sweep training checkpoint - complete all sublevels instantly
+  const sweepTrainingCheckpoint = useCallback((checkpoint) => {
+    // Get current player stats including equipment and mount
+    let totalAttack = gameState.attack;
+    let totalLife = gameState.life;
+    let totalDefense = gameState.defense;
+    let totalAgility = gameState.agility;
+    
+    // Add equipment bonuses
+    Object.values(gameState.equipment).forEach(equip => {
+      if (equip) {
+        totalAttack += equip.attack || 0;
+        totalLife += equip.life || 0;
+        totalDefense += equip.defense || 0;
+        totalAgility += equip.agility || 0;
+      }
+    });
+    
+    // Add mount bonuses
+    if (gameState.mount) {
+      totalAttack += gameState.mount.attack || 0;
+      totalLife += gameState.mount.life || 0;
+      totalDefense += gameState.mount.defense || 0;
+      totalAgility += gameState.mount.agility || 0;
+    }
+    
+    const playerStats = {
+      attack: totalAttack,
+      life: totalLife,
+      defense: totalDefense,
+      agility: totalAgility
+    };
+
+    // Check if player can sweep this checkpoint
+    if (!TRAINING_CONFIG.canSweepCheckpoint(playerStats, checkpoint)) {
+      showNotification('⚠️ 实力不足以扫荡该关卡！需要战力远超BOSS才能扫荡。');
+      return false;
+    }
+
+    // Complete the entire checkpoint
+    setGameState(prev => {
+      const newTraining = { ...prev.training };
+      
+      // Mark checkpoint as completed (rewards must be claimed separately)
+      if (!newTraining.completedCheckpoints.includes(checkpoint)) {
+        newTraining.completedCheckpoints.push(checkpoint);
+      }
+      
+      // Move to next checkpoint
+      newTraining.currentCheckpoint = checkpoint + 1;
+      newTraining.currentSubLevel = 1;
+
+      return {
+        ...prev,
+        training: newTraining
+      };
+    });
+
+    showNotification(`⚡ 扫荡成功！快速完成第 ${checkpoint} 关所有小关卡！请领取奖励。`);
+    return true;
+  }, [gameState.attack, gameState.life, gameState.defense, gameState.agility, gameState.equipment, gameState.mount, showNotification, setGameState]);
+
   const value = {
     gameState,
     setGameState,
@@ -609,7 +671,8 @@ export const GameProvider = ({ children }) => {
     upgradeMount,
     // Training system
     startTrainingBattle,
-    claimTrainingReward
+    claimTrainingReward,
+    sweepTrainingCheckpoint
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
