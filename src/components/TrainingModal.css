@@ -32,6 +32,47 @@
   .training-content {
     grid-template-columns: 1fr;
   }
+  
+  .checkpoint-item {
+    padding: 10px;
+  }
+  
+  .checkpoint-info {
+    font-size: 14px;
+  }
+  
+  .checkpoint-reward {
+    font-size: 11px;
+  }
+  
+  .claim-button-small {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .claimed-badge {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+  
+  .collapsed-checkpoints-indicator {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .collapsed-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .collapsed-text {
+    font-size: 13px;
+  }
+  
+  .collapsed-expand {
+    font-size: 11px;
+  }
 }
 
 .checkpoints-section h3,
@@ -80,6 +121,56 @@
 .checkpoint-item.locked {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.checkpoint-item.claimed {
+  background: #f0f9ff;
+  border-color: #0284c7;
+}
+
+.collapsed-checkpoints-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border: 2px dashed #0284c7;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+
+.collapsed-checkpoints-indicator:hover {
+  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
+  transform: translateX(4px);
+}
+
+.collapsed-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.collapsed-text {
+  flex: 1;
+  font-weight: 500;
+  color: #0369a1;
+}
+
+.collapsed-expand {
+  font-size: 12px;
+  color: #0284c7;
+  font-weight: bold;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .checkpoint-number {
